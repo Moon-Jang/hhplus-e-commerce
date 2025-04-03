@@ -1,0 +1,959 @@
+openapi: 3.0.0
+info:
+  title: HH Plus E-Commerce API
+  description: HH Plus E-Commerce REST API 문서
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: 로컬 개발 서버
+
+tags:
+  - name: 잔액
+    description: 유저 잔액 관련 API
+  - name: 상품
+    description: 상품 관련 API
+  - name: 쿠폰
+    description: 쿠폰 관련 API
+  - name: 주문/결제
+    description: 주문 및 결제 관련 API
+
+paths:
+  /users/{userId}/point:
+    get:
+      tags:
+        - 잔액
+      summary: 잔액 조회
+      description: 유저의 잔액을 조회합니다.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 성공적으로 잔액을 조회했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserPoint'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  id: 1
+                  userId: 1000
+                  amount: 50000
+        '400':
+          description: 유저가 유효하지 않습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                status: "USER_WITHDRAWN"
+                message: "탈퇴한 유저입니다."
+                data: null
+        '404':
+          description: 유저를 찾을 수 없습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                status: "USER_NOT_FOUND"
+                message: "해당 사용자를 찾을 수 없습니다."
+                data: null
+
+  /users/{userId}/point/charge:
+    post:
+      tags:
+        - 잔액
+      summary: 잔액 충전
+      description: 유저의 잔액을 충전합니다.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPointChargeRequest'
+            example:
+              amount: 10000
+      responses:
+        '200':
+          description: 성공적으로 잔액을 충전했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserPoint'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  id: 1
+                  userId: 1000
+                  amount: 60000
+        '400':
+          description: 충전 금액이 유효하지 않거나 최대 잔액을 초과합니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              examples:
+                최소금액미만:
+                  value:
+                    status: "INVALID_CHARGE_AMOUNT"
+                    message: "충전 금액은 최소 100원 이상이어야 합니다."
+                    data: null
+                최대금액초과:
+                  value:
+                    status: "INVALID_CHARGE_AMOUNT"
+                    message: "충전 금액은 최대 1,000,000원 이하여야 합니다."
+                    data: null
+                최대잔액초과:
+                  value:
+                    status: "EXCEEDED_MAX_BALANCE"
+                    message: "충전시 최대 잔액이 1,000,000원을 초과할 수 없습니다."
+                    data: null
+        '404':
+          description: 유저를 찾을 수 없습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                status: "USER_NOT_FOUND"
+                message: "해당 사용자를 찾을 수 없습니다."
+                data: null
+
+  /products:
+    get:
+      tags:
+        - 상품
+      summary: 상품 목록 조회
+      description: 상품 목록을 조회합니다.
+      responses:
+        '200':
+          description: 성공적으로 상품 목록을 조회했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProductList'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  - id: 1
+                    name: "스마트폰"
+                    price: 1000000
+                    quantity: 100
+                  - id: 2
+                    name: "노트북"
+                    price: 1500000
+                    quantity: 50
+                  - id: 3
+                    name: "이어폰"
+                    price: 300000
+                    quantity: 200
+
+  /products/{productId}:
+    get:
+      tags:
+        - 상품
+      summary: 상품 상세 조회
+      description: 특정 상품의 상세 정보를 조회합니다.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 성공적으로 상품 상세 정보를 조회했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProductDetail'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  id: 1
+                  name: "스마트폰"
+                  price: 1000000
+                  quantity: 100
+                  description: "최신형 스마트폰입니다. 고성능 카메라와 대용량 배터리를 탑재했습니다."
+        '404':
+          description: 상품을 찾을 수 없습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                status: "PRODUCT_NOT_FOUND"
+                message: "해당 상품을 찾을 수 없습니다."
+                data: null
+
+  /products/popular:
+    get:
+      tags:
+        - 상품
+      summary: 인기 판매 상품 조회
+      description: 최근 3일간 가장 많이 팔린 상위 5개 상품을 조회합니다.
+      responses:
+        '200':
+          description: 성공적으로 인기 판매 상품을 조회했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePopularProductList'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  - id: 1
+                    name: "스마트폰"
+                    price: 1000000
+                    quantity: 100
+                    soldCount: 87
+                  - id: 3
+                    name: "이어폰"
+                    price: 300000
+                    quantity: 200
+                    soldCount: 65
+                  - id: 5
+                    name: "스마트워치"
+                    price: 450000
+                    quantity: 80
+                    soldCount: 42
+                  - id: 2
+                    name: "노트북"
+                    price: 1500000
+                    quantity: 50
+                    soldCount: 35
+                  - id: 4
+                    name: "태블릿"
+                    price: 800000
+                    quantity: 70
+                    soldCount: 28
+
+  /coupons:
+    get:
+      tags:
+        - 쿠폰
+      summary: 선착순 쿠폰 목록 조회
+      description: 발급 가능한 선착순 쿠폰 목록을 조회합니다.
+      responses:
+        '200':
+          description: 성공적으로 선착순 쿠폰 목록을 조회했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseLimitedCouponList'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  - id: 1
+                    name: "신규가입 할인쿠폰"
+                    discountAmount: 5000
+                    startTime: "2023-12-01T10:00:00"
+                    quantity: 100
+                    remainingQuantity: 45
+                    isAvailable: true
+                  - id: 2
+                    name: "주말 특별 할인쿠폰"
+                    discountAmount: 10000
+                    startTime: "2023-12-02T12:00:00"
+                    quantity: 50
+                    remainingQuantity: 50
+                    isAvailable: false
+
+  /coupons/{couponId}/issue:
+    post:
+      tags:
+        - 쿠폰
+      summary: 선착순 쿠폰 발급
+      description: 선착순으로 쿠폰을 발급받습니다.
+      parameters:
+        - name: couponId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponIssueRequest'
+            example:
+              userId: 1000
+      responses:
+        '200':
+          description: 성공적으로 쿠폰을 발급받았습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseIssuedCoupon'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  id: 101
+                  userId: 1000
+                  couponId: 1
+                  name: "신규가입 할인쿠폰"
+                  discountAmount: 5000
+                  expirationDate: "2023-12-08T23:59:59"
+                  isUsed: false
+                  usedAt: null
+                  issuedAt: "2023-12-01T10:30:45"
+        '400':
+          description: 쿠폰 발급에 실패했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              examples:
+                발급기간아님:
+                  value:
+                    status: "COUPON_ISSUE_TIME_NOT_ARRIVED"
+                    message: "쿠폰 발급 가능 시간이 아닙니다."
+                    data: null
+                수량부족:
+                  value:
+                    status: "COUPON_OUT_OF_STOCK"
+                    message: "쿠폰 수량이 모두 소진되었습니다."
+                    data: null
+        '404':
+          description: 쿠폰 또는 유저를 찾을 수 없습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              examples:
+                쿠폰없음:
+                  value:
+                    status: "COUPON_NOT_FOUND"
+                    message: "해당 쿠폰을 찾을 수 없습니다."
+                    data: null
+                유저없음:
+                  value:
+                    status: "USER_NOT_FOUND"
+                    message: "해당 사용자를 찾을 수 없습니다."
+                    data: null
+
+  /coupons/issued/{userId}:
+    get:
+      tags:
+        - 쿠폰
+      summary: 보유한 쿠폰 목록 조회
+      description: 특정 유저가 보유한 쿠폰 목록을 조회합니다.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: used
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: 사용 여부로 필터링 (null인 경우 모든 쿠폰 조회)
+      responses:
+        '200':
+          description: 성공적으로 보유한 쿠폰 목록을 조회했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseIssuedCouponList'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  - id: 101
+                    userId: 1000
+                    couponId: 1
+                    name: "신규가입 할인쿠폰"
+                    discountAmount: 5000
+                    expirationDate: "2023-12-08T23:59:59"
+                    isUsed: false
+                    usedAt: null
+                    issuedAt: "2023-12-01T10:30:45"
+                  - id: 102
+                    userId: 1000
+                    couponId: 2
+                    name: "첫 구매 할인쿠폰"
+                    discountAmount: 3000
+                    expirationDate: "2023-12-15T23:59:59"
+                    isUsed: false
+                    usedAt: null
+                    issuedAt: "2023-12-01T12:15:30"
+        '400':
+          description: 유저가 유효하지 않습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                status: "USER_WITHDRAWN"
+                message: "탈퇴한 유저입니다."
+                data: null
+        '404':
+          description: 유저를 찾을 수 없습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                status: "USER_NOT_FOUND"
+                message: "해당 사용자를 찾을 수 없습니다."
+                data: null
+
+  /orders:
+    post:
+      tags:
+        - 주문/결제
+      summary: 주문 생성
+      description: 새로운 주문을 생성합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+            example:
+              userId: 1000
+              items:
+                - productId: 1
+                  quantity: 1
+              couponId: 101
+      responses:
+        '200':
+          description: 성공적으로 주문을 생성했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseOrder'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  orderId: 1001
+                  userId: 1000
+                  items:
+                    - productId: 1
+                      productName: "스마트폰"
+                      price: 1000000
+                      quantity: 1
+                      amount: 1000000
+                  totalAmount: 1000000
+                  discountAmount: 5000
+                  finalAmount: 995000
+                  coupon:
+                    couponId: 101
+                    name: "신규가입 할인쿠폰"
+                    discountAmount: 5000
+                  orderStatus: "CREATED"
+                  createdAt: "2023-12-01T14:30:00"
+        '400':
+          description: 주문 생성에 실패했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              examples:
+                재고부족:
+                  value:
+                    status: "INSUFFICIENT_STOCK"
+                    message: "상품의 재고가 부족합니다."
+                    data: null
+                쿠폰만료:
+                  value:
+                    status: "COUPON_EXPIRED"
+                    message: "만료된 쿠폰입니다."
+                    data: null
+                쿠폰사용됨:
+                  value:
+                    status: "COUPON_ALREADY_USED"
+                    message: "이미 사용된 쿠폰입니다."
+                    data: null
+        '404':
+          description: 유저, 상품 또는 쿠폰을 찾을 수 없습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              examples:
+                유저없음:
+                  value:
+                    status: "USER_NOT_FOUND"
+                    message: "해당 사용자를 찾을 수 없습니다."
+                    data: null
+                상품없음:
+                  value:
+                    status: "PRODUCT_NOT_FOUND"
+                    message: "해당 상품을 찾을 수 없습니다."
+                    data: null
+                쿠폰없음:
+                  value:
+                    status: "COUPON_NOT_FOUND"
+                    message: "해당 쿠폰을 찾을 수 없습니다."
+                    data: null
+
+  /orders/{orderId}/pay:
+    post:
+      tags:
+        - 주문/결제
+      summary: 주문 결제
+      description: 특정 주문에 대한 결제를 진행합니다.
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 성공적으로 결제를 완료했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePayment'
+              example:
+                status: "SUCCESS"
+                message: "성공"
+                data:
+                  orderId: 1001
+                  paymentId: 2001
+                  amount: 995000
+                  paymentStatus: "SUCCESS"
+                  paidAt: "2023-12-01T14:30:15"
+        '400':
+          description: 결제에 실패했습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              examples:
+                잔액부족:
+                  value:
+                    status: "INSUFFICIENT_BALANCE"
+                    message: "잔액이 부족합니다."
+                    data: null
+        '404':
+          description: 주문을 찾을 수 없습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                status: "ORDER_NOT_FOUND"
+                message: "해당 주문을 찾을 수 없습니다."
+                data: null
+
+components:
+  schemas:
+    # 공통 응답 형식
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+
+    ApiResponseError:
+      type: object
+      properties:
+        status:
+          type: string
+          description: 에러 상태 코드
+          enum:
+            # 공통 에러 상태
+            - SUCCESS
+            - FAILURE
+            - ERROR
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - NOT_FOUND
+
+            # 유저/잔액 관련 에러 상태
+            - USER_NOT_FOUND
+            - USER_WITHDRAWN
+            - INVALID_CHARGE_AMOUNT
+            - EXCEEDED_MAX_BALANCE
+            - INSUFFICIENT_BALANCE
+
+            # 상품 관련 에러 상태
+            - PRODUCT_NOT_FOUND
+            - INSUFFICIENT_STOCK
+
+            # 쿠폰 관련 에러 상태
+            - COUPON_NOT_FOUND
+            - COUPON_EXPIRED
+            - COUPON_ALREADY_USED
+            - COUPON_ISSUE_TIME_NOT_ARRIVED
+            - COUPON_OUT_OF_STOCK
+
+            # 주문 관련 에러 상태
+            - ORDER_NOT_FOUND
+            - INVALID_ORDER_ITEMS
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+
+    # 잔액 관련 스키마
+    UserPoint:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+
+    UserPointChargeRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: 충전할 금액
+
+    ApiResponseUserPoint:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UserPoint'
+
+    # 상품 관련 스키마
+    ProductSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+
+    ProductDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+        description:
+          type: string
+
+    PopularProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+        soldCount:
+          type: integer
+
+    ApiResponseProductList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProductSummary'
+
+    ApiResponseProductDetail:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ProductDetail'
+
+    ApiResponsePopularProductList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/PopularProduct'
+
+    # 쿠폰 관련 스키마
+    LimitedCoupon:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        discountAmount:
+          type: integer
+          format: int64
+        startTime:
+          type: string
+          format: date-time
+        quantity:
+          type: integer
+        remainingQuantity:
+          type: integer
+        isAvailable:
+          type: boolean
+
+    IssuedCoupon:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        couponId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        discountAmount:
+          type: integer
+          format: int64
+        expirationDate:
+          type: string
+          format: date-time
+        isUsed:
+          type: boolean
+        usedAt:
+          type: string
+          format: date-time
+          nullable: true
+        issuedAt:
+          type: string
+          format: date-time
+
+    CouponIssueRequest:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: integer
+          format: int64
+
+    ApiResponseLimitedCouponList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/LimitedCoupon'
+
+    ApiResponseIssuedCoupon:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IssuedCoupon'
+
+    ApiResponseIssuedCouponList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IssuedCoupon'
+
+    # 주문 관련 스키마
+    OrderItem:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        price:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+        amount:
+          type: integer
+          format: int64
+
+    OrderItemRequest:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          minimum: 1
+
+    OrderCreateRequest:
+      type: object
+      required:
+        - userId
+        - items
+      properties:
+        userId:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+        couponId:
+          type: integer
+          format: int64
+          nullable: true
+
+    UsedCoupon:
+      type: object
+      properties:
+        couponId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        discountAmount:
+          type: integer
+          format: int64
+
+    Order:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        totalAmount:
+          type: integer
+          format: int64
+        discountAmount:
+          type: integer
+          format: int64
+        finalAmount:
+          type: integer
+          format: int64
+        coupon:
+          $ref: '#/components/schemas/UsedCoupon'
+          nullable: true
+        orderStatus:
+          type: string
+          enum: [CREATED, COMPLETED, CANCELED]
+        createdAt:
+          type: string
+          format: date-time
+
+    Payment:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        paymentId:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+        paymentStatus:
+          type: string
+          enum: [SUCCESS, FAILED]
+        paidAt:
+          type: string
+          format: date-time
+
+    ApiResponseOrder:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Order'
+
+    ApiResponseOrderList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
+
+    ApiResponsePayment:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Payment'
