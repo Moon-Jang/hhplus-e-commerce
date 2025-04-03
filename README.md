@@ -17,3 +17,10 @@
 
 ![erd](docs/erd/erd.png)
 [(ERD 링크)](docs/erd)
+
+## 스웨거 문서
+
+![swagger](docs/swagger/swagger.png)
+[(스웨거 링크)](https://app.swaggerhub.com/apis/roby8502/hhplus-ecommerce/1.0.0)
+
+[(스웨거 yaml)](docs/swagger/swagger.yaml)
