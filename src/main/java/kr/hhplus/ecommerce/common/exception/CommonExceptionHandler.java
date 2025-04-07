@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import kr.hhplus.ecommerce.common.web.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -130,7 +131,8 @@ public class CommonExceptionHandler {
     @ExceptionHandler(DomainException.class)
     public ApiResponse<Void> domainException(DomainException e,
                                              HttpServletRequest request) {
-        log.warn("[{}] 도메인 오류가 발생하였습니다.", request.getRequestURI(), e);
+        log.atLevel(e.isCritical() ? Level.ERROR : Level.WARN)
+            .log("[{}] 도메인 오류가 발생하였습니다.", request.getRequestURI(), e);
 
         return ApiResponse.fail(e.status(), e.message());
     }
