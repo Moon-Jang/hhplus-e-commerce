@@ -19,6 +19,11 @@ public enum DomainStatus implements Status {
     PRODUCT_NOT_FOUND("상품을 찾을 수 없습니다."),
     PRODUCT_OPTION_NOT_FOUND("상품 옵션을 찾을 수 없습니다."),
     INSUFFICIENT_STOCK("재고가 부족합니다."),
+
+    // issued-coupon
+    ISSUED_COUPON_NOT_FOUND("발급된 쿠폰을 찾을 수 없습니다."),
+    EXPIRED_COUPON("만료된 쿠폰입니다."),
+    ALREADY_USED_COUPON("이미 사용된 쿠폰입니다."),
     ;
 
     private final String message;
