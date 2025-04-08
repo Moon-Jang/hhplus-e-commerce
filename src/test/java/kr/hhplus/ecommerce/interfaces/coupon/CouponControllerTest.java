@@ -41,7 +41,7 @@ class CouponControllerTest extends ControllerTestContext {
             given()
                 .body(request)
                 .when()
-                .post("/api/coupons/{couponId}/issue", 1L)
+                .post("/v1/coupons/{couponId}/issue", 1L)
                 .then()
                 .log().all()
                 .apply(
@@ -89,7 +89,7 @@ class CouponControllerTest extends ControllerTestContext {
             // when/then
             given()
                 .when()
-                .get("/api/coupons/available")
+                .get("/v1/coupons/available")
                 .then()
                 .log().all()
                 .apply(
