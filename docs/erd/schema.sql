@@ -84,23 +84,6 @@ CREATE TABLE `product` (
     INDEX `idx_price` (`price`)
 ) COMMENT='상품 정보 테이블';
 
--- 일일 상품 판매 통계 테이블
--- 상품별 일별 판매 통계를 저장합니다. 인기 상품 조회에 활용됩니다.
-CREATE TABLE `daily_product_statistics` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '통계 ID',
-    `product_id` BIGINT NOT NULL COMMENT '상품 ID',
-    `aggregation_date` DATE NOT NULL COMMENT '집계 날짜',
-    `sales_count` INT NOT NULL DEFAULT 0 COMMENT '일일 판매량',
-    `sales_amount` INT NOT NULL DEFAULT 0 COMMENT '일일 판매 금액',
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 시간',
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 시간',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_product_date` (`product_id`, `aggregation_date`),
-    INDEX `idx_aggregation_date` (`aggregation_date`),
-    INDEX `idx_product_id` (`product_id`),
-    CONSTRAINT `fk_daily_statistics_product_id` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
-) COMMENT='일일 상품 판매 통계 테이블';
-
 -- 주문 테이블
 -- 유저의 주문 정보를 저장합니다.
 CREATE TABLE `order` (
@@ -111,7 +94,6 @@ CREATE TABLE `order` (
     `total_amount` INT NOT NULL COMMENT '총 주문 금액 (상품 금액 합계)',
     `discount_amount` INT NOT NULL DEFAULT 0 COMMENT '할인 금액',
     `final_amount` INT NOT NULL COMMENT '최종 결제 금액',
-    `failed_reason` VARCHAR(200) NULL COMMENT '실패 이유',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 시간 (주문 시간)',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 시간',
     PRIMARY KEY (`id`),
