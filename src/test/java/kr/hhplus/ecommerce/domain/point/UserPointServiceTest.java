@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_NOT_FOUND;
+import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_POINT_NOT_FOUND;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserFixture;
 import kr.hhplus.ecommerce.domain.user.UserRepository;
@@ -97,6 +98,74 @@ public class UserPointServiceTest {
             verify(userPointRepository).findByUserId(user.id());
             verify(userPointRepository).save(any(UserPoint.class));
             verify(userPointHistoryRepository).save(any(UserPointHistory.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("사용 테스트")
+    class UseTest {
+        @Test
+        void 성공() {
+            // given
+            User user = new UserFixture().create();
+            UserPoint userPoint = new UserPointFixture().setUserId(user.id()).create();
+            UserPointCommand.Use command = new UserPointCommand.Use(user.id(), 1000);
+            given(userRepository.findById(user.id())).willReturn(Optional.of(user));
+            given(userPointRepository.findByUserId(user.id()))
+                .willReturn(Optional.of(userPoint));
+            given(userPointRepository.save(any(UserPoint.class)))
+                .willReturn(userPoint);
+
+            // when
+            service.use(command);
+
+            // then
+            verify(userRepository).findById(user.id());
+            verify(userPointRepository).findByUserId(user.id());
+            verify(userPointRepository).save(any(UserPoint.class));
+            verify(userPointHistoryRepository).save(any(UserPointHistory.class));
+        }
+
+        @Test
+        void 탈퇴한_유저이면_실패() {
+            // given
+            User user = new UserFixture().setWithdrawnAt(LocalDateTime.now()).create();
+            UserPointCommand.Use command = new UserPointCommand.Use(user.id(), 1000);
+            given(userRepository.findById(user.id())).willReturn(Optional.of(user));
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.use(command));
+
+            // then
+            assertThat(throwable).isInstanceOf(NotFoundException.class)
+                .hasFieldOrPropertyWithValue("status", USER_NOT_FOUND)
+                .hasMessage(USER_NOT_FOUND.message());
+            verify(userRepository).findById(user.id());
+            verify(userPointRepository, times(0)).findByUserId(user.id());
+            verify(userPointRepository, times(0)).save(any(UserPoint.class));
+            verify(userPointHistoryRepository, times(0)).save(any(UserPointHistory.class));
+        }
+
+        @Test
+        void 유저_포인트가_존재하지_않으면_실패() {
+            // given
+            User user = new UserFixture().create();
+            UserPointCommand.Use command = new UserPointCommand.Use(user.id(), 1000);
+            given(userRepository.findById(user.id())).willReturn(Optional.of(user));
+            given(userPointRepository.findByUserId(user.id()))
+                .willReturn(Optional.empty());
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.use(command));
+
+            // then
+            assertThat(throwable).isInstanceOf(NotFoundException.class)
+                .hasFieldOrPropertyWithValue("status", USER_POINT_NOT_FOUND)
+                .hasMessage(USER_POINT_NOT_FOUND.message());
+            verify(userRepository).findById(user.id());
+            verify(userPointRepository).findByUserId(user.id());
+            verify(userPointRepository, times(0)).save(any(UserPoint.class));
+            verify(userPointHistoryRepository, times(0)).save(any(UserPointHistory.class));
         }
     }
 } 

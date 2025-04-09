@@ -31,6 +31,10 @@ public class UserPointHistory extends BaseEntity {
         return new UserPointHistory(userId, amount, Type.CHARGE);
     }
 
+    public static UserPointHistory createUseHistory(long userId, int amount) {
+        return new UserPointHistory(userId, amount, Type.USE);
+    }
+
     public enum Type {
         CHARGE, USE
     }

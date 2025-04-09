@@ -12,6 +12,8 @@ public enum DomainStatus implements Status {
     USER_POINT_NOT_FOUND("사용자 포인트를 찾을 수 없습니다."),
     INVALID_CHARGE_AMOUNT("충전 금액은 %d원 이상 %d원 이하여야 합니다.".formatted(UserPoint.MIN_CHARGE_AMOUNT, UserPoint.MAX_CHARGE_AMOUNT)),
     EXCEEDED_MAX_USER_POINT("충전 후 잔액은 %d원을 초과할 수 없습니다.".formatted(UserPoint.MAX_BALANCE)),
+    INVALID_USE_AMOUNT("사용 금액은 %d원 이상이어야 합니다.".formatted(UserPoint.MIN_USE_AMOUNT)),
+    INSUFFICIENT_BALANCE("잔액이 부족합니다."),
     ;
 
     private final String message;

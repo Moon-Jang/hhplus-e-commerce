@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_NOT_FOUND;
+import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_POINT_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,24 @@ public class UserPointService {
         UserPointHistory chargeHistory = UserPointHistory.createChargeHistory(user.id(), command.amount());
         userPointHistoryRepository.save(chargeHistory);
         
+        return UserPointVo.from(savedUserPoint);
+    }
+
+    @Transactional
+    public UserPointVo use(UserPointCommand.Use command) {
+        User user = userRepository.findById(command.userId())
+            .filter(User::isActive)
+            .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+
+        UserPoint userPoint = userPointRepository.findByUserId(user.id())
+            .orElseThrow(() -> new NotFoundException(USER_POINT_NOT_FOUND));
+
+        userPoint.use(command.amount());
+        UserPoint savedUserPoint = userPointRepository.save(userPoint);
+
+        UserPointHistory useHistory = UserPointHistory.createUseHistory(user.id(), command.amount());
+        userPointHistoryRepository.save(useHistory);
+
         return UserPointVo.from(savedUserPoint);
     }
 } 

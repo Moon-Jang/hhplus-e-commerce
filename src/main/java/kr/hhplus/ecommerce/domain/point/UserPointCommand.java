@@ -6,4 +6,10 @@ public class UserPointCommand {
         int amount
     ) {
     }
+
+    public record Use(
+        long userId,
+        int amount
+    ) {
+    }
 }

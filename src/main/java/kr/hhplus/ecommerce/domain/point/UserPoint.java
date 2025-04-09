@@ -10,8 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.EXCEEDED_MAX_USER_POINT;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INVALID_CHARGE_AMOUNT;
+import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
 
 @Entity(name = "user_points")
 @Getter
@@ -52,5 +51,17 @@ public class UserPoint extends BaseEntity {
         }
 
         this.amount += amount;
+    }
+
+    public void use(int amount) {
+        if (amount < MIN_USE_AMOUNT) {
+            throw new DomainException(INVALID_USE_AMOUNT);
+        }
+
+        if (this.amount < amount) {
+            throw new DomainException(INSUFFICIENT_BALANCE);
+        }
+
+        this.amount -= amount;
     }
 } 
