@@ -14,6 +14,10 @@ public enum DomainStatus implements Status {
     EXCEEDED_MAX_USER_POINT("충전 후 잔액은 %d원을 초과할 수 없습니다.".formatted(UserPoint.MAX_BALANCE)),
     INVALID_USE_AMOUNT("사용 금액은 %d원 이상이어야 합니다.".formatted(UserPoint.MIN_USE_AMOUNT)),
     INSUFFICIENT_BALANCE("잔액이 부족합니다."),
+
+    // product
+    PRODUCT_NOT_FOUND("상품을 찾을 수 없습니다."),
+    PRODUCT_OPTION_NOT_FOUND("상품 옵션을 찾을 수 없습니다."),
     ;
 
     private final String message;

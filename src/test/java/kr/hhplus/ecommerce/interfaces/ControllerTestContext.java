@@ -116,6 +116,7 @@ public class ControllerTestContext {
 
     protected enum Tags {
         POINT("포인트"),
+        PRODUCT("상품"),
         ;
 
         private final String tagName;
