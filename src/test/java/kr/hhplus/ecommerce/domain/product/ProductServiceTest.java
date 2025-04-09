@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_NOT_FOUND;
+import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_OPTION_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -153,4 +156,40 @@ public class ProductServiceTest {
                 .hasMessage(PRODUCT_NOT_FOUND.message());
         }
     }
-} 
+
+    @Nested
+    @DisplayName("재고 차감 테스트")
+    class DecreaseStockTest {
+        @Test
+        void 성공() {
+            // given
+            ProductOption option = new ProductOptionFixture()
+                .setStock(100)
+                .create();
+            given(productOptionRepository.findById(option.id())).willReturn(Optional.of(option));
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.decreaseStock(option.id(), 10));
+
+            // then
+            assertThat(throwable).isNull();
+            verify(productOptionRepository).findById(option.id());
+            verify(productOptionRepository).save(option);
+        }
+
+        @Test
+        void 상품_옵션이_존재하지_않는_경우_실패() {
+            // given
+            long notExistOptionId = 999L;
+            given(productOptionRepository.findById(notExistOptionId)).willReturn(Optional.empty());
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.decreaseStock(notExistOptionId, 10));
+
+            // then
+            assertThat(throwable).isInstanceOf(NotFoundException.class)
+                .hasMessage(PRODUCT_OPTION_NOT_FOUND.message());
+            verify(productOptionRepository, times(0)).save(any());
+        }
+    }
+}

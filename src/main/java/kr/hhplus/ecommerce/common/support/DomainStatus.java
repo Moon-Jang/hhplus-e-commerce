@@ -18,6 +18,7 @@ public enum DomainStatus implements Status {
     // product
     PRODUCT_NOT_FOUND("상품을 찾을 수 없습니다."),
     PRODUCT_OPTION_NOT_FOUND("상품 옵션을 찾을 수 없습니다."),
+    INSUFFICIENT_STOCK("재고가 부족합니다."),
     ;
 
     private final String message;

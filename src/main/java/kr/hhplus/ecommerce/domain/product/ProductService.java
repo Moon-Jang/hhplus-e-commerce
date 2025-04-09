@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_NOT_FOUND;
+import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_OPTION_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ProductOptionRepository productOptionRepository;
 
     @Transactional(readOnly = true)
     public List<ProductVo> findAll() {
@@ -64,4 +66,13 @@ public class ProductService {
         List<ProductOption> productOptions = productOptionRepository.findAllByProductId(productId);
         return ProductVo.from(product, productOptions);
     }
-} 
+
+    @Transactional
+    public void decreaseStock(long optionId, int quantity) {
+        ProductOption option = productOptionRepository.findById(optionId)
+            .orElseThrow(() -> new NotFoundException(PRODUCT_OPTION_NOT_FOUND));
+
+        option.decreaseStock(quantity);
+        productOptionRepository.save(option);
+    }
+}
