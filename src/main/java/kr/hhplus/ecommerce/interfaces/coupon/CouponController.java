@@ -4,9 +4,12 @@ import jakarta.validation.Valid;
 import kr.hhplus.ecommerce.common.web.ApiResponse;
 import kr.hhplus.ecommerce.domain.coupon.CouponCommand;
 import kr.hhplus.ecommerce.domain.coupon.CouponService;
+import kr.hhplus.ecommerce.domain.coupon.CouponVo;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/coupons")
@@ -22,6 +25,17 @@ public class CouponController {
         
         return ApiResponse.success(
             CouponResponse.IssuedCouponDetails.from(issuedCoupon)
+        );
+    }
+    
+    @GetMapping("/available")
+    ApiResponse<List<CouponResponse.CouponSummary>> getAvailableCoupons() {
+        List<CouponVo> coupons = couponService.getAvailableCoupons();
+        
+        return ApiResponse.success(
+            coupons.stream()
+                .map(CouponResponse.CouponSummary::from)
+                .toList()
         );
     }
 } 

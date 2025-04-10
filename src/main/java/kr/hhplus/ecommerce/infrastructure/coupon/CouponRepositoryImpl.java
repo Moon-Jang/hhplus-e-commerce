@@ -21,10 +21,8 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     @Override
-    public List<Coupon> findAvailableCoupons() {
+    public List<Coupon> findAvailableCoupons(LocalDateTime dateTime) {
         // TODO: Implement with actual DB access
-        // 현재 시간이 발급 시작 시간과 종료 시간 사이이며, 발급 가능 수량이 남아있는 쿠폰 목록 조회
-        LocalDateTime now = LocalDateTime.now();
         return Collections.emptyList();
     }
 

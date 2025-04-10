@@ -1,12 +1,13 @@
 package kr.hhplus.ecommerce.interfaces.coupon;
 
+import kr.hhplus.ecommerce.domain.coupon.CouponVo;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponVo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class CouponResponse {
-    public record Coupon(
+    public record CouponSummary(
             long id,
             String name,
             long discountAmount,
@@ -15,6 +16,17 @@ public class CouponResponse {
             int maxQuantity,
             int currentQuantity
     ) {
+        public static CouponSummary from(CouponVo coupon) {
+            return new CouponSummary(
+                    coupon.id(),
+                    coupon.name(),
+                    coupon.discountAmount(),
+                    coupon.issueStartTime(),
+                    coupon.issueEndTime(),
+                    coupon.maxQuantity(),
+                    coupon.issuedQuantity()
+            );
+        }
     }
 
     public record IssuedCouponDetails(

@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static kr.hhplus.ecommerce.common.support.DomainStatus.COUPON_NOT_FOUND;
 import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_NOT_FOUND;
 
@@ -31,5 +35,13 @@ public class CouponService {
         return IssuedCouponVo.from(
             issuedCouponRepository.save(issuedCoupon)
         );
+    }
+    
+    @Transactional(readOnly = true)
+    public List<CouponVo> getAvailableCoupons() {
+        return couponRepository.findAvailableCoupons(LocalDateTime.now())
+            .stream()
+            .map(CouponVo::from)
+            .collect(Collectors.toList());
     }
 } 
