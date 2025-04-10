@@ -13,120 +13,167 @@ import static kr.hhplus.ecommerce.common.support.DomainStatus.EXPIRED_COUPON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-public class IssuedCouponTest {
+class IssuedCouponTest {
 
     @Nested
-    @DisplayName("쿠폰 사용 테스트")
-    class UseTest {
+    @DisplayName("생성자 메서드")
+    class ConstructorTest {
+
         @Test
-        void 만료되지_않은_쿠폰_사용_성공() {
+        @DisplayName("쿠폰이 발급되면 사용 시간이 null이다")
+        void 쿠폰이_발급되면_사용_시간이_null이다() {
+            // given
+            long userId = 1L;
+            LocalDate expiryDate = LocalDate.now().plusDays(7);
+            Coupon coupon = new CouponFixture().create();
+
+            // when
+            IssuedCoupon issuedCoupon = new IssuedCoupon(userId, expiryDate, coupon);
+
+            // then
+            assertThat(issuedCoupon.usedAt()).isNull();
+            assertThat(issuedCoupon.isUsed()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("isExpired 메서드")
+    class IsExpiredTest {
+
+        @Test
+        @DisplayName("만료일이 지났으면 true를 반환한다")
+        void 만료일이_지났으면_true를_반환한다() {
             // given
             IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setExpiryDate(LocalDate.now().plusDays(1))
-                .create();
+                    .setExpiryDate(LocalDate.now().minusDays(1))
+                    .create();
+
+            // when
+            boolean result = issuedCoupon.isExpired();
+
+            // then
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("만료일이 오늘이면 false를 반환한다")
+        void 만료일이_오늘이면_false를_반환한다() {
+            // given
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                    .setExpiryDate(LocalDate.now())
+                    .create();
+
+            // when
+            boolean result = issuedCoupon.isExpired();
+
+            // then
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("만료일이 지나지 않았으면 false를 반환한다")
+        void 만료일이_지나지_않았으면_false를_반환한다() {
+            // given
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                    .setExpiryDate(LocalDate.now().plusDays(1))
+                    .create();
+
+            // when
+            boolean result = issuedCoupon.isExpired();
+
+            // then
+            assertThat(result).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("isUsed 메서드")
+    class IsUsedTest {
+
+        @Test
+        @DisplayName("사용 시간이 null이 아니면 true를 반환한다")
+        void 사용_시간이_null이_아니면_true를_반환한다() {
+            // given
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                    .setUsedAt(LocalDateTime.now())
+                    .create();
+
+            // when
+            boolean result = issuedCoupon.isUsed();
+
+            // then
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("사용 시간이 null이면 false를 반환한다")
+        void 사용_시간이_null이면_false를_반환한다() {
+            // given
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                    .setUsedAt(null)
+                    .create();
+
+            // when
+            boolean result = issuedCoupon.isUsed();
+
+            // then
+            assertThat(result).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("use 메서드")
+    class UseTest {
+
+        @Test
+        @DisplayName("이미 사용된 쿠폰이면 예외가 발생한다")
+        void 이미_사용된_쿠폰이면_예외가_발생한다() {
+            // given
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                    .setUsedAt(LocalDateTime.now())
+                    .create();
+
+            // when
+            Throwable throwable = catchThrowable(issuedCoupon::use);
+
+            // then
+            assertThat(throwable)
+                    .isInstanceOf(DomainException.class)
+                    .hasFieldOrPropertyWithValue("status", ALREADY_USED_COUPON);
+        }
+
+        @Test
+        @DisplayName("만료된 쿠폰이면 예외가 발생한다")
+        void 만료된_쿠폰이면_예외가_발생한다() {
+            // given
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                    .setExpiryDate(LocalDate.now().minusDays(1))
+                    .create();
+
+            // when
+            Throwable throwable = catchThrowable(issuedCoupon::use);
+
+            // then
+            assertThat(throwable)
+                    .isInstanceOf(DomainException.class)
+                    .hasFieldOrPropertyWithValue("status", EXPIRED_COUPON);
+        }
+
+        @Test
+        @DisplayName("쿠폰 사용에 성공하면 사용 시간이 설정된다")
+        void 쿠폰_사용에_성공하면_사용_시간이_설정된다() {
+            // given
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                    .setUsedAt(null)
+                    .setExpiryDate(LocalDate.now().plusDays(1))
+                    .create();
 
             // when
             issuedCoupon.use();
 
             // then
             assertThat(issuedCoupon.usedAt()).isNotNull();
-        }
-
-        @Test
-        void 만료된_쿠폰_사용_실패() {
-            // given
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setExpiryDate(LocalDate.now().minusDays(1))
-                .create();
-
-            // when
-            Throwable throwable = catchThrowable(issuedCoupon::use);
-
-            // then
-            assertThat(throwable).isInstanceOf(DomainException.class)
-                .hasFieldOrPropertyWithValue("status", EXPIRED_COUPON)
-                .hasMessageContaining(EXPIRED_COUPON.message());
-        }
-
-        @Test
-        void 이미_사용된_쿠폰_사용_실패() {
-            // given
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setUsedAt(LocalDateTime.now().minusDays(1))
-                .create();
-
-            // when
-            Throwable throwable = catchThrowable(issuedCoupon::use);
-
-            // then
-            assertThat(throwable).isInstanceOf(DomainException.class)
-                .hasFieldOrPropertyWithValue("status", ALREADY_USED_COUPON)
-                .hasMessage(ALREADY_USED_COUPON.message());
+            assertThat(issuedCoupon.isUsed()).isTrue();
         }
     }
-
-    @Nested
-    @DisplayName("쿠폰 사용 확인 테스트")
-    class IsUsedTest {
-        @Test
-        void 사용된_쿠폰_확인() {
-            // given
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setUsedAt(LocalDateTime.now())
-                .create();
-
-            // when
-            boolean result = issuedCoupon.isUsed();
-
-            // then
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void 사용되지_않은_쿠폰_확인() {
-            // given
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setUsedAt(null)
-                .create();
-
-            // when
-            boolean result = issuedCoupon.isUsed();
-
-            // then
-            assertThat(result).isFalse();
-        }
-    }
-
-    @Nested
-    @DisplayName("쿠폰 만료 확인 테스트")
-    class IsExpiredTest {
-        @Test
-        void 만료된_쿠폰_확인() {
-            // given
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setExpiryDate(LocalDate.now().minusDays(1))
-                .create();
-
-            // when
-            boolean result = issuedCoupon.isExpired();
-
-            // then
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void 만료되지_않은_쿠폰_확인() {
-            // given
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setExpiryDate(LocalDate.now().plusDays(1))
-                .create();
-
-            // when
-            boolean result = issuedCoupon.isExpired();
-
-            // then
-            assertThat(result).isFalse();
-        }
-    }
-
 } 
