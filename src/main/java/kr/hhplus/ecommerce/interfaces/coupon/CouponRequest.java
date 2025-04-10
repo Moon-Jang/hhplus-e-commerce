@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.controller.request;
+package kr.hhplus.ecommerce.interfaces.coupon;
 
 import jakarta.validation.constraints.NotNull;
 
