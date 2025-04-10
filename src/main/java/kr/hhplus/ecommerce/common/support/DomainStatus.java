@@ -24,6 +24,13 @@ public enum DomainStatus implements Status {
     ISSUED_COUPON_NOT_FOUND("발급된 쿠폰을 찾을 수 없습니다."),
     EXPIRED_COUPON("만료된 쿠폰입니다."),
     ALREADY_USED_COUPON("이미 사용된 쿠폰입니다."),
+    
+    // order
+    ORDER_NOT_FOUND("주문을 찾을 수 없습니다."),
+    ALREADY_COMPLETED_ORDER("이미 완료된 주문입니다."),
+
+    // payment
+    PAYMENT_METHOD_NOT_SUPPORTED("지원하지 않는 결제 수단입니다."),
     ;
 
     private final String message;

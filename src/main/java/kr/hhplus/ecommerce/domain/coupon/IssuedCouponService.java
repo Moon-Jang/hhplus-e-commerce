@@ -1,6 +1,7 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
 import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,5 +20,11 @@ public class IssuedCouponService {
         
         issuedCoupon.use();
         issuedCouponRepository.save(issuedCoupon);
+    }
+    
+    @Transactional(readOnly = true)
+    public IssuedCoupon findById(long id) {
+        return issuedCouponRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ISSUED_COUPON_NOT_FOUND));
     }
 } 
