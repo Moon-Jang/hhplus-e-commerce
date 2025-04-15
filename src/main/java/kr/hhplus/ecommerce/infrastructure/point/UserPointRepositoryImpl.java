@@ -10,16 +10,15 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class UserPointRepositoryImpl implements UserPointRepository {
+    private final UserPointJpaRepository userPointJpaRepository;
     
     @Override
     public Optional<UserPoint> findByUserId(long userId) {
-        // TODO: Implement me
-        return Optional.empty();
+        return userPointJpaRepository.findByUserId(userId);
     }
     
     @Override
     public UserPoint save(UserPoint userPoint) {
-        // TODO: Implement me
-        return null;
+        return userPointJpaRepository.save(userPoint);
     }
 }

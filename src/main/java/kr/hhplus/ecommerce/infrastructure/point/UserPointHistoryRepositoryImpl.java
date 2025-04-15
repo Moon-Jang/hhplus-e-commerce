@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserPointHistoryRepositoryImpl implements UserPointHistoryRepository {
+    private final UserPointHistoryJpaRepository userPointHistoryJpaRepository;
 
     @Override
     public UserPointHistory save(UserPointHistory userPointHistory) {
-        // TODO: Implement me
-        return null;
+        return userPointHistoryJpaRepository.save(userPointHistory);
     }
 } 
