@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import kr.hhplus.ecommerce.common.entity.BaseEntity;
+import kr.hhplus.ecommerce.domain.product.ProductOption;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -29,5 +30,10 @@ public class OrderItem extends BaseEntity {
         this.productPrice = productPrice;
         this.quantity = quantity;
         this.amount = productPrice * quantity;
+    }
+
+    public OrderItem(ProductOption productOption,
+                     int quantity) {
+        this(productOption.id(), productOption.price(), quantity);
     }
 }

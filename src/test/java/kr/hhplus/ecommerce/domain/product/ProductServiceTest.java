@@ -1,5 +1,6 @@
 package kr.hhplus.ecommerce.domain.product;
 
+import kr.hhplus.ecommerce.common.exception.BadRequestException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -159,21 +160,23 @@ public class ProductServiceTest {
 
     @Nested
     @DisplayName("재고 차감 테스트")
-    class DecreaseStockTest {
+    class DeductStockTest {
         @Test
         void 성공() {
             // given
             ProductOption option = new ProductOptionFixture()
                 .setStock(100)
                 .create();
-            given(productOptionRepository.findById(option.id())).willReturn(Optional.of(option));
+            given(productOptionRepository.findAllByIds(List.of(option.id()))).willReturn(List.of(option));
 
             // when
-            Throwable throwable = catchThrowable(() -> service.decreaseStock(option.id(), 10));
+            ProductCommand.DeductStock command = new ProductCommand.DeductStock(
+                List.of(new ProductCommand.DeductStock.Item(option.id(), 10))
+            );
+            service.deductStock(command);
 
             // then
-            assertThat(throwable).isNull();
-            verify(productOptionRepository).findById(option.id());
+            verify(productOptionRepository).findAllByIds(List.of(option.id()));
             verify(productOptionRepository).save(option);
         }
 
@@ -181,15 +184,45 @@ public class ProductServiceTest {
         void 상품_옵션이_존재하지_않는_경우_실패() {
             // given
             long notExistOptionId = 999L;
-            given(productOptionRepository.findById(notExistOptionId)).willReturn(Optional.empty());
+            given(productOptionRepository.findAllByIds(List.of(notExistOptionId))).willReturn(List.of());
 
             // when
-            Throwable throwable = catchThrowable(() -> service.decreaseStock(notExistOptionId, 10));
+            ProductCommand.DeductStock command = new ProductCommand.DeductStock(
+                List.of(new ProductCommand.DeductStock.Item(notExistOptionId, 10))
+            );
+            Throwable throwable = catchThrowable(() -> service.deductStock(command));
 
             // then
-            assertThat(throwable).isInstanceOf(NotFoundException.class)
+            assertThat(throwable).isInstanceOf(BadRequestException.class)
                 .hasMessage(PRODUCT_OPTION_NOT_FOUND.message());
             verify(productOptionRepository, times(0)).save(any());
+        }
+        
+        @Test
+        void 일부_상품_옵션이_존재하지_않는_경우_실패() {
+            // given
+            long existOptionId = 1L;
+            long notExistOptionId = 999L;
+            ProductOption option = new ProductOptionFixture()
+                .setId(existOptionId)
+                .setStock(100)
+                .create();
+            given(productOptionRepository.findAllByIds(List.of(existOptionId, notExistOptionId)))
+                .willReturn(List.of(option));
+
+            // when
+            ProductCommand.DeductStock command = new ProductCommand.DeductStock(
+                List.of(
+                    new ProductCommand.DeductStock.Item(existOptionId, 10),
+                    new ProductCommand.DeductStock.Item(notExistOptionId, 5)
+                )
+            );
+            Throwable throwable = catchThrowable(() -> service.deductStock(command));
+
+            // then
+            assertThat(throwable).isInstanceOf(BadRequestException.class)
+                .hasMessage(PRODUCT_OPTION_NOT_FOUND.message());
+            verify(productOptionRepository, times(1)).save(any());
         }
     }
 }

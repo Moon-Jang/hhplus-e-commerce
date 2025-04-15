@@ -24,7 +24,7 @@ public class ProductOption extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    public void decreaseStock(int quantity) {
+    public void deductStock(int quantity) {
         if (quantity <= 0) {
             throw new DomainException(INVALID_PARAMETER, "차감될 수량은 0이하 일 수 없습니다.");
         }
@@ -34,5 +34,9 @@ public class ProductOption extends BaseEntity {
         }
 
         this.stock -= quantity;
+    }
+
+    public int price() {
+        return product.price();
     }
 } 

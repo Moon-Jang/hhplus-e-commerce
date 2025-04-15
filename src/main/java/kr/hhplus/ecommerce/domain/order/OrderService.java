@@ -1,18 +1,16 @@
 package kr.hhplus.ecommerce.domain.order;
 
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import kr.hhplus.ecommerce.domain.coupon.Coupon;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
+import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -24,13 +22,21 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductOptionRepository productOptionRepository;
     private final IssuedCouponRepository issuedCouponRepository;
+    private final DataPlatFormClient dataPlatFormClient;
     
     @Transactional
     public OrderVo create(OrderCommand.Create command) {
-        List<ProductOption> productOptions = getProductOptions(command.items());
-        Optional<IssuedCoupon> issuedCoupon = command.issuedCouponId()
-            .flatMap(issuedCouponRepository::findById);
-        Order order = createOrder(command, productOptions, issuedCoupon);
+        Order order = new Order(command.userId());
+
+        Map<Long, ProductOption> productOptionMap = getProductOptionMap(command.items());
+        command.items().forEach(item -> {
+            ProductOption productOption = productOptionMap.get(item.productOptionId());
+            order.addItem(productOption, item.quantity());
+        });
+
+        command.issuedCouponId()
+            .flatMap(issuedCouponRepository::findById)
+            .ifPresent(order::applyCoupon);
 
         return OrderVo.from(
             orderRepository.save(order)
@@ -43,43 +49,20 @@ public class OrderService {
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND));
 
         order.complete();
+        dataPlatFormClient.sendOrderAsync(order.id());
 
         return OrderVo.from(
             orderRepository.save(order)
         );
     }
 
-    private List<ProductOption> getProductOptions(List<OrderCommand.Create.OrderItem> items) {
+    private Map<Long, ProductOption> getProductOptionMap(List<OrderCommand.Create.OrderItem> items) {
         List<Long> optionIds = items.stream()
             .map(OrderCommand.Create.OrderItem::productOptionId)
             .toList();
-        return productOptionRepository.findAllByIds(optionIds);
-    }
 
-    private Order createOrder(OrderCommand.Create command,
-                              List<ProductOption> productOptions,
-                              Optional<IssuedCoupon> issuedCoupon) {
-        Map<Long, ProductOption> productOptionMap = productOptions.stream()
+        return productOptionRepository.findAllByIds(optionIds)
+            .stream()
             .collect(Collectors.toMap(ProductOption::id, Function.identity()));
-
-        return new Order(
-            command.userId(),
-            issuedCoupon.map(IssuedCoupon::id)
-                .orElse(null),
-            issuedCoupon.map(IssuedCoupon::coupon)
-                .map(Coupon::discountAmount)
-                .orElse(0),
-            command.items()
-                .stream()
-                .map(item -> {
-                    ProductOption productOption = productOptionMap.get(item.productOptionId());
-                    return new OrderItem(
-                        productOption.id(),
-                        productOption.product().price(),
-                        item.quantity()
-                    );
-                })
-                .toList()
-        );
     }
 } 

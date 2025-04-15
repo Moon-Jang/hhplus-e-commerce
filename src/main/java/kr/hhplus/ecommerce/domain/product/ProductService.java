@@ -1,5 +1,6 @@
 package kr.hhplus.ecommerce.domain.product;
 
+import kr.hhplus.ecommerce.common.exception.BadRequestException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -68,11 +69,24 @@ public class ProductService {
     }
 
     @Transactional
-    public void decreaseStock(long optionId, int quantity) {
-        ProductOption option = productOptionRepository.findById(optionId)
-            .orElseThrow(() -> new NotFoundException(PRODUCT_OPTION_NOT_FOUND));
+    public void deductStock(ProductCommand.DeductStock command) {
+        List<Long> optionIds = command.productOptionIds();
+        Map<Long,ProductOption> optionMap = productOptionRepository.findAllByIds(optionIds)
+            .stream()
+            .collect(Collectors.toMap(ProductOption::id, option -> option));
 
-        option.decreaseStock(quantity);
-        productOptionRepository.save(option);
+        if (optionMap.isEmpty()) {
+            throw new BadRequestException(PRODUCT_OPTION_NOT_FOUND);
+        }
+        
+        command.items()
+            .forEach(item -> {
+                ProductOption option = optionMap.get(item.productOptionId());
+                if (option == null) {
+                    throw new BadRequestException(PRODUCT_OPTION_NOT_FOUND);
+                }
+                option.deductStock(item.quantity());
+                productOptionRepository.save(option);
+            });
     }
 }

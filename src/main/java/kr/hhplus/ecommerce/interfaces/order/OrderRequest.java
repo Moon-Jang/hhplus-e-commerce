@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import kr.hhplus.ecommerce.domain.order.OrderCommand;
-import kr.hhplus.ecommerce.domain.payment.Payment;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,8 +16,7 @@ public class OrderRequest {
         @NotEmpty(message = "주문할 상품은 필수입니다.")
         List<OrderItem> items,
 
-        Optional<Long> issuedCouponId,
-        Payment.Method payMethod
+        Optional<Long> issuedCouponId
     ) {
         public OrderCommand.Create toCommand() {
             return new OrderCommand.Create(
@@ -29,7 +27,7 @@ public class OrderRequest {
                         item.quantity
                     ))
                     .toList(),
-                this.issuedCouponId
+                issuedCouponId
             );
         }
 

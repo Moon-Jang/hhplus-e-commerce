@@ -1,6 +1,7 @@
 package kr.hhplus.ecommerce.domain.order;
 
 import kr.hhplus.ecommerce.common.TestFixture;
+import kr.hhplus.ecommerce.domain.common.Money;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -19,9 +20,9 @@ public class OrderVoFixture implements TestFixture<OrderVo> {
     private List<OrderVo.Item> items = new ArrayList<>() {{
         add(new OrderVo.Item(1L, 1L, 10_000, 1, 10_000));
     }};
-    private int totalAmount = 10_000;
-    private int discountAmount = 0;
-    private int finalAmount = 10_000;
+    private Money totalAmount = Money.wons(10_000);
+    private Money discountAmount = Money.ZERO;
+    private Money finalAmount = Money.wons(10_000);
     private Optional<Long> issuedCouponId = Optional.empty();
     private Order.Status status = Order.Status.COMPLETED;
     private LocalDateTime createdAt = LocalDateTime.now();

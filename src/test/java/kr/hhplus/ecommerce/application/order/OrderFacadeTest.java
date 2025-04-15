@@ -6,14 +6,12 @@ import kr.hhplus.ecommerce.domain.order.Order;
 import kr.hhplus.ecommerce.domain.order.OrderCommand;
 import kr.hhplus.ecommerce.domain.order.OrderService;
 import kr.hhplus.ecommerce.domain.order.OrderVoFixture;
-import kr.hhplus.ecommerce.domain.payment.Payment;
 import kr.hhplus.ecommerce.domain.payment.PaymentCommand;
 import kr.hhplus.ecommerce.domain.payment.PaymentService;
+import kr.hhplus.ecommerce.domain.point.UserPointCommand;
+import kr.hhplus.ecommerce.domain.point.UserPointService;
+import kr.hhplus.ecommerce.domain.product.ProductCommand;
 import kr.hhplus.ecommerce.domain.product.ProductService;
-import kr.hhplus.ecommerce.domain.user.UserFixture;
-import kr.hhplus.ecommerce.domain.user.UserService;
-import kr.hhplus.ecommerce.domain.user.UserVo;
-import kr.hhplus.ecommerce.interfaces.order.OrderApplicationEvent;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -24,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,9 +45,7 @@ class OrderFacadeTest {
     @Mock
     private ProductService productService;
     @Mock
-    private UserService userService;
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private UserPointService userPointService;
 
     @Nested
     @DisplayName("주문 처리 테스트")
@@ -59,66 +54,61 @@ class OrderFacadeTest {
         void 성공() {
             // given
             OrderCommand.Create command = new CommandFixture().create();
-            given(userService.findActiveUserById(command.userId())).willReturn(UserVo.from(new UserFixture().create()));
-            given(orderService.create(command)).willReturn(new OrderVoFixture().setStatus(Order.Status.PENDING).create());
+            given(orderService.create(command)).willReturn(new OrderVoFixture()
+                .setIssuedCouponId(command.issuedCouponId()).setStatus(Order.Status.PENDING).create());
             given(orderService.complete(any(OrderCommand.Complete.class))).willReturn(new OrderVoFixture().create());
             
             // when
-            facade.process(command, Payment.Method.POINT);
+            facade.process(command);
             
             // then
-            verify(userService).findActiveUserById(command.userId());
             verify(orderService).create(command);
-            verify(productService, times(command.items().size())).decreaseStock(anyLong(), anyInt());
-            verify(issuedCouponService).use(command.issuedCouponId().orElseThrow());
+            verify(productService).deductStock(any(ProductCommand.DeductStock.class));
+            verify(issuedCouponService).use(anyLong());
+            verify(userPointService).use(any(UserPointCommand.Use.class));
             verify(paymentService).pay(any(PaymentCommand.Pay.class));
             verify(orderService).complete(any(OrderCommand.Complete.class));
-            verify(eventPublisher).publishEvent(any(OrderApplicationEvent.Complete.class));
         }
 
         @Test
         void 쿠폰이_없는_경우_성공() {
             // given
             OrderCommand.Create command = new CommandFixture().setIssuedCouponId(Optional.empty()).create();
-            given(userService.findActiveUserById(command.userId())).willReturn(UserVo.from(new UserFixture().create()));
             given(orderService.create(command)).willReturn(new OrderVoFixture().setStatus(Order.Status.PENDING).create());
             given(orderService.complete(any(OrderCommand.Complete.class))).willReturn(new OrderVoFixture().create());
 
             // when
-            facade.process(command, Payment.Method.POINT);
+            facade.process(command);
 
             // then
-            verify(userService).findActiveUserById(command.userId());
             verify(orderService).create(command);
-            verify(productService, times(command.items().size())).decreaseStock(anyLong(), anyInt());
+            verify(productService).deductStock(any(ProductCommand.DeductStock.class));
             verify(issuedCouponService, never()).use(anyLong());
+            verify(userPointService).use(any(UserPointCommand.Use.class));
             verify(paymentService).pay(any(PaymentCommand.Pay.class));
             verify(orderService).complete(any(OrderCommand.Complete.class));
-            verify(eventPublisher).publishEvent(any(OrderApplicationEvent.Complete.class));
         }
         
         @Test
         void 결제_실패시_예외_발생() {
             // given
             OrderCommand.Create command = new CommandFixture().create();
-            given(userService.findActiveUserById(command.userId())).willReturn(UserVo.from(new UserFixture().create()));
-            given(orderService.create(command)).willReturn(new OrderVoFixture().setStatus(Order.Status.PENDING).create());
+            given(orderService.create(command)).willReturn(new OrderVoFixture()
+                .setIssuedCouponId(command.issuedCouponId()).setStatus(Order.Status.PENDING).create());
             given(paymentService.pay(any(PaymentCommand.Pay.class))).willThrow(new RuntimeException("결제 실패"));
             
             // when
-            Throwable throwable = catchThrowable(() -> facade.process(command, Payment.Method.POINT));
+            Throwable throwable = catchThrowable(() -> facade.process(command));
             
             // then
             assertThat(throwable).isInstanceOf(RuntimeException.class);
             assertThat(throwable).hasMessage("결제 실패");
-            verify(userService).findActiveUserById(command.userId());
             verify(orderService).create(command);
-            verify(productService, times(command.items().size())).decreaseStock(anyLong(), anyInt());
-            verify(issuedCouponService).use(command.issuedCouponId().orElseThrow());
+            verify(productService).deductStock(any(ProductCommand.DeductStock.class));
+            verify(issuedCouponService).use(anyLong());
+            verify(userPointService).use(any(UserPointCommand.Use.class));
             verify(paymentService).pay(any(PaymentCommand.Pay.class));
-            verify(eventPublisher).publishEvent(any(OrderApplicationEvent.PaymentFailure.class));
             verify(orderService, never()).complete(any(OrderCommand.Complete.class));
-            verify(eventPublisher, never()).publishEvent(any(OrderApplicationEvent.Complete.class));
         }
         
         @Getter

@@ -2,10 +2,12 @@ package kr.hhplus.ecommerce.domain.order;
 
 import kr.hhplus.ecommerce.common.TestFixture;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
 import kr.hhplus.ecommerce.domain.product.*;
+import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -25,6 +27,7 @@ import static kr.hhplus.ecommerce.common.support.DomainStatus.ORDER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,6 +42,8 @@ class OrderServiceTest {
     private ProductOptionRepository productOptionRepository;
     @Mock
     private IssuedCouponRepository issuedCouponRepository;
+    @Mock
+    private DataPlatFormClient dataPlatFormClient;
     
     @Nested
     @DisplayName("주문 생성 테스트")
@@ -79,9 +84,9 @@ class OrderServiceTest {
             assertThat(capturedOrder.items().get(1).productPrice()).isEqualTo(productOptions.get(1).product().price());
             assertThat(capturedOrder.items().get(1).quantity()).isEqualTo(command.items().get(1).quantity());
             assertThat(capturedOrder.items().get(1).amount()).isEqualTo(productOptions.get(1).product().price() * command.items().get(1).quantity());
-            assertThat(capturedOrder.totalAmount()).isEqualTo(capturedOrder.items().stream().mapToLong(OrderItem::amount).sum());
-            assertThat(capturedOrder.discountAmount()).isEqualTo(0);
-            assertThat(capturedOrder.finalAmount()).isEqualTo(capturedOrder.totalAmount() - capturedOrder.discountAmount());
+            assertThat(capturedOrder.priceDetails().totalAmount().intValue()).isEqualTo(capturedOrder.items().stream().mapToLong(OrderItem::amount).sum());
+            assertThat(capturedOrder.priceDetails().discountAmount().intValue()).isEqualTo(0);
+            assertThat(capturedOrder.priceDetails().finalAmount().intValue()).isEqualTo(capturedOrder.priceDetails().totalAmount().subtract(capturedOrder.priceDetails().discountAmount()).intValue());
             assertThat(capturedOrder.issuedCouponId()).isNull();
             assertThat(capturedOrder.status()).isEqualTo(Order.Status.PENDING);
         }
@@ -94,7 +99,9 @@ class OrderServiceTest {
                 new ProductOptionFixture().setId(1L).setProduct(product).create()
             );
             List<Long> productOptionIds = productOptions.stream().map(ProductOption::id).toList();
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture().create();
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture()
+                .setCoupon(new CouponFixture().setDiscountAmount(100).create())
+                .create();
             OrderCommand.Create command = new CommandFixture()
                 .setItems(List.of(
                     new OrderCommand.Create.OrderItem(productOptions.get(0).id(), 2)
@@ -120,9 +127,9 @@ class OrderServiceTest {
             assertThat(capturedOrder.items().get(0).productPrice()).isEqualTo(productOptions.get(0).product().price());
             assertThat(capturedOrder.items().get(0).quantity()).isEqualTo(command.items().get(0).quantity());
             assertThat(capturedOrder.items().get(0).amount()).isEqualTo(productOptions.get(0).product().price() * command.items().get(0).quantity());
-            assertThat(capturedOrder.totalAmount()).isEqualTo(capturedOrder.items().stream().mapToLong(OrderItem::amount).sum());
-            assertThat(capturedOrder.discountAmount()).isEqualTo(issuedCoupon.coupon().discountAmount());
-            assertThat(capturedOrder.finalAmount()).isEqualTo(capturedOrder.totalAmount() - capturedOrder.discountAmount());
+            assertThat(capturedOrder.priceDetails().totalAmount().intValue()).isEqualTo(capturedOrder.items().stream().mapToLong(OrderItem::amount).sum());
+            assertThat(capturedOrder.priceDetails().discountAmount().intValue()).isEqualTo(issuedCoupon.coupon().discountAmount());
+            assertThat(capturedOrder.priceDetails().finalAmount().intValue()).isEqualTo(capturedOrder.priceDetails().totalAmount().subtract(capturedOrder.priceDetails().discountAmount()).intValue());
             assertThat(capturedOrder.issuedCouponId()).isEqualTo(issuedCoupon.id());
             assertThat(capturedOrder.status()).isEqualTo(Order.Status.PENDING);
         }
@@ -167,6 +174,7 @@ class OrderServiceTest {
             // then
             ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
             verify(orderRepository).save(orderCaptor.capture());
+            verify(dataPlatFormClient).sendOrderAsync(order.id());
             Order capturedOrder = orderCaptor.getValue();
             assertThat(capturedOrder.id()).isEqualTo(order.id());
             assertThat(capturedOrder.status()).isEqualTo(Order.Status.COMPLETED);
@@ -188,6 +196,7 @@ class OrderServiceTest {
                 .hasMessage(ORDER_NOT_FOUND.message());
             verify(orderRepository).findById(command.orderId());
             verify(orderRepository, times(0)).save(any(Order.class));
+            verify(dataPlatFormClient, times(0)).sendOrderAsync(anyLong());
         }
     }
 }

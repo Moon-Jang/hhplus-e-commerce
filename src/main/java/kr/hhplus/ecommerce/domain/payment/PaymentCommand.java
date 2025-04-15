@@ -1,16 +1,16 @@
 package kr.hhplus.ecommerce.domain.payment;
 
+import kr.hhplus.ecommerce.domain.common.Money;
+
 public class PaymentCommand {
     public record Pay(
-        long orderId,
-        Payment.Method payMethod
+        long orderId
     ) {
     }
 
     public record SaveFailureHistory(
         long userId,
-        int amount,
-        Payment.Method payMethod,
+        Money amount,
         String failedReason
     ) {
     }

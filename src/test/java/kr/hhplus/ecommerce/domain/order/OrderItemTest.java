@@ -1,5 +1,7 @@
 package kr.hhplus.ecommerce.domain.order;
 
+import kr.hhplus.ecommerce.domain.product.ProductOption;
+import kr.hhplus.ecommerce.domain.product.ProductOptionFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,22 @@ class OrderItemTest {
             assertThat(orderItem.productPrice()).isEqualTo(productPrice);
             assertThat(orderItem.quantity()).isEqualTo(quantity);
             assertThat(orderItem.amount()).isEqualTo(productPrice * quantity);
+        }
+
+        @Test
+        void ProductOption_포함한_생성자_성공() {
+            // given
+            ProductOption productOption = new ProductOptionFixture().create();
+            int quantity = 2;
+
+            // when
+            OrderItem orderItem = new OrderItem(productOption, quantity);
+
+            // then
+            assertThat(orderItem.productOptionId()).isEqualTo(productOption.id());
+            assertThat(orderItem.productPrice()).isEqualTo(productOption.price());
+            assertThat(orderItem.quantity()).isEqualTo(quantity);
+            assertThat(orderItem.amount()).isEqualTo(productOption.price() * quantity);
         }
     }
 }

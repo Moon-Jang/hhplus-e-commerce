@@ -57,4 +57,18 @@ public class IssuedCoupon extends BaseEntity {
 
         this.usedAt = LocalDateTime.now();
     }
-} 
+
+    public int discountAmount() {
+        return coupon.discountAmount();
+    }
+
+    public void validateUsable() {
+        if (isExpired()) {
+            throw new DomainException(EXPIRED_COUPON);
+        }
+
+        if (isUsed()) {
+            throw new DomainException(ALREADY_USED_COUPON);
+        }
+    }
+}

@@ -16,9 +16,7 @@ public class OrderFixture implements TestFixture<Order> {
     private Long id = 1L;
     private long userId = 1L;
     private Long issuedCouponId = null;
-    private int totalAmount = 10_000;
-    private int discountAmount = 0;
-    private int finalAmount = 10_000;
+    private OrderPriceDetails priceDetails = new OrderPriceFixture().create();
     private Order.Status status = Order.Status.PENDING;
     private List<OrderItem> items = new ArrayList<>(){{
         add(new OrderItemFixture().create());
