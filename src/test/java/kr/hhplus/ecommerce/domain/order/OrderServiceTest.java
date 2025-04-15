@@ -1,36 +1,41 @@
 package kr.hhplus.ecommerce.domain.order;
 
-import kr.hhplus.ecommerce.common.TestFixture;
-import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
-import kr.hhplus.ecommerce.domain.product.*;
-import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ORDER_NOT_FOUND;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import kr.hhplus.ecommerce.common.TestFixture;
+import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import static kr.hhplus.ecommerce.common.support.DomainStatus.ORDER_NOT_FOUND;
+import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
+import kr.hhplus.ecommerce.domain.product.Product;
+import kr.hhplus.ecommerce.domain.product.ProductFixture;
+import kr.hhplus.ecommerce.domain.product.ProductOption;
+import kr.hhplus.ecommerce.domain.product.ProductOptionFixture;
+import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
+import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -197,6 +202,59 @@ class OrderServiceTest {
             verify(orderRepository).findById(command.orderId());
             verify(orderRepository, times(0)).save(any(Order.class));
             verify(dataPlatFormClient, times(0)).sendOrderAsync(anyLong());
+        }
+    }
+    
+    @Nested
+    @DisplayName("인기 판매 상품 ID 조회 테스트")
+    class FindTopSellingProductIdsTest {
+        @Test
+        void 인기_상품_ID_조회_성공() {
+            // given
+            int limit = 5;
+            List<Long> expectedProductIds = Arrays.asList(1L, 2L, 3L, 4L, 5L);
+            given(orderRepository.findTopSellingProductIds(limit)).willReturn(expectedProductIds);
+            
+            // when
+            List<Long> result = service.findTopSellingProductIds(limit);
+            
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(5);
+            assertThat(result).containsExactly(1L, 2L, 3L, 4L, 5L);
+            verify(orderRepository).findTopSellingProductIds(limit);
+        }
+        
+        @Test
+        void 인기_상품이_없을때_빈_목록_반환() {
+            // given
+            int limit = 5;
+            given(orderRepository.findTopSellingProductIds(limit)).willReturn(List.of());
+            
+            // when
+            List<Long> result = service.findTopSellingProductIds(limit);
+            
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).isEmpty();
+            verify(orderRepository).findTopSellingProductIds(limit);
+        }
+        
+        @Test
+        void 요청_개수만큼_인기_상품_ID_반환() {
+            // given
+            int limit = 3;
+            List<Long> expectedProductIds = Arrays.asList(1L, 2L, 3L);
+            given(orderRepository.findTopSellingProductIds(limit)).willReturn(expectedProductIds);
+            
+            // when
+            List<Long> result = service.findTopSellingProductIds(limit);
+            
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(3);
+            assertThat(result).containsExactly(1L, 2L, 3L);
+            verify(orderRepository).findTopSellingProductIds(limit);
         }
     }
 }

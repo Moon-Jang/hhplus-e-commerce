@@ -1,20 +1,20 @@
 package kr.hhplus.ecommerce.domain.order;
 
-import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
-import kr.hhplus.ecommerce.domain.product.ProductOption;
-import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
-import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import static kr.hhplus.ecommerce.common.support.DomainStatus.ORDER_NOT_FOUND;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
+import kr.hhplus.ecommerce.domain.product.ProductOption;
+import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
+import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +54,11 @@ public class OrderService {
         return OrderVo.from(
             orderRepository.save(order)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findTopSellingProductIds(int limit) {
+        return orderRepository.findTopSellingProductIds(limit);
     }
 
     private Map<Long, ProductOption> getProductOptionMap(List<OrderCommand.Create.OrderItem> items) {

@@ -1,21 +1,24 @@
 package kr.hhplus.ecommerce.interfaces.product;
 
-import kr.hhplus.ecommerce.common.web.ApiResponse;
-import kr.hhplus.ecommerce.domain.product.ProductService;
-import kr.hhplus.ecommerce.domain.product.ProductVo;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import kr.hhplus.ecommerce.application.product.ProductFacade;
+import kr.hhplus.ecommerce.common.web.ApiResponse;
+import kr.hhplus.ecommerce.domain.product.ProductService;
+import kr.hhplus.ecommerce.domain.product.ProductVo;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private final ProductFacade productFacade;
 
     @GetMapping
     public ApiResponse<List<ProductResponse.ProductSummary>> getAllProducts() {
@@ -32,5 +35,14 @@ public class ProductController {
         return ApiResponse.success(
             ProductResponse.ProductDetails.from(productVo)
         );
+    }
+    
+    @GetMapping("/top-selling")
+    public ApiResponse<List<ProductResponse.ProductSummary>> getTopSellingProducts(ProductRequest.GetTopSelling request) {
+        List<ProductVo> products = productFacade.findTopSellingProducts(request.limit());
+        List<ProductResponse.ProductSummary> response = products.stream()
+            .map(ProductResponse.ProductSummary::from)
+            .toList();
+        return ApiResponse.success(response);
     }
 } 
