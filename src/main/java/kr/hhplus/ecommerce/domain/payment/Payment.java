@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Entity(name = "payments")
+@Table(indexes = {
+    @Index(name = "idx_payment_order_id", columnList = "orderId"),
+    @Index(name = "idx_payment_user_id", columnList = "userId")
+})
 @Getter
 @Accessors(fluent = true)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
