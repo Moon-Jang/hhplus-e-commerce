@@ -23,6 +23,8 @@ class CouponControllerTest extends ControllerTestContext {
 
     @MockitoBean
     private CouponService couponService;
+    @MockitoBean
+    private IssuedCouponService issuedCouponService;
 
     @Nested
     @DisplayName("선착순 쿠폰 발급")
@@ -34,7 +36,7 @@ class CouponControllerTest extends ControllerTestContext {
             // given
             var request = new CouponRequest.Issue(1L);
             doReturn(IssuedCouponVo.from(new IssuedCouponFixture().create()))
-                .when(couponService)
+                .when(issuedCouponService)
                 .issue(any());
 
             // when/then
