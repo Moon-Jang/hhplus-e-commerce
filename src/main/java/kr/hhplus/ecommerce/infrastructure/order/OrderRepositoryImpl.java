@@ -17,17 +17,16 @@ import static kr.hhplus.ecommerce.domain.product.QProductOption.productOption;
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
     private final JPAQueryFactory queryFactory;
+    private final OrderJpaRepository orderJpaRepository;
     
     @Override
     public Optional<Order> findById(Long id) {
-        // TODO: Implement me
-        return Optional.empty();
+        return orderJpaRepository.findById(id);
     }
 
     @Override
     public Order save(Order order) {
-        // TODO: Implement me
-        return null;
+        return orderJpaRepository.save(order);
     }
     
     @Override
