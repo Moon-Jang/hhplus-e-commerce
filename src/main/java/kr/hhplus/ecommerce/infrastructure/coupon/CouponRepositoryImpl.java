@@ -6,29 +6,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class CouponRepositoryImpl implements CouponRepository {
+    private final CouponJpaRepository couponJpaRepository;
 
     @Override
     public Optional<Coupon> findById(long couponId) {
-        // TODO: Implement with actual DB access
-        return Optional.empty();
+        return couponJpaRepository.findById(couponId);
     }
 
     @Override
     public List<Coupon> findAvailableCoupons(LocalDateTime dateTime) {
-        // TODO: Implement with actual DB access
-        return Collections.emptyList();
+        return couponJpaRepository.findAvailableCoupons(dateTime);
     }
 
     @Override
     public Coupon save(Coupon coupon) {
-        // TODO: Implement with actual DB access
-        return coupon;
+        return couponJpaRepository.save(coupon);
     }
 } 
