@@ -1,11 +1,12 @@
 package kr.hhplus.ecommerce.config;
 
-import kr.hhplus.ecommerce.common.web.CommonObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.hhplus.ecommerce.common.web.CommonObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
@@ -27,5 +28,10 @@ public class ApplicationConfiguration {
     @Bean
     JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
+    }
+    
+    @Bean
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
     }
 }
