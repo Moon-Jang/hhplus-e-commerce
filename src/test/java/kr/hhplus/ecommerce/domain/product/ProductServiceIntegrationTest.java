@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -182,6 +183,207 @@ class ProductServiceIntegrationTest extends IntegrationTestContext {
                 .isInstanceOf(BadRequestException.class)
                 .hasFieldOrPropertyWithValue("status", PRODUCT_OPTION_NOT_FOUND)
                 .hasMessage(PRODUCT_OPTION_NOT_FOUND.message());
+        }
+    }
+    
+    @Nested
+    @DisplayName("동시성 테스트")
+    class ConcurrencyTest {
+        @Test
+        void 재고_부족시_일부만_성공하고_나머지는_실패() throws InterruptedException {
+            // given
+            int initialStock = 20; // 초기 재고 20개
+            ProductOption option = productOptionJpaRepository.save(
+                new ProductOptionFixture()
+                    .setId(null)
+                    .setProduct(product)
+                    .setStock(initialStock)
+                    .create()
+            );
+
+            int threadCount = 10;
+            int deductQuantity = 5; // 각 요청당 5개씩 차감
+            // 총 요청량: 10 * 5 = 50 > 초기 재고 20
+            // 따라서 4개 요청만 성공 가능 (20 / 5 = 4)
+
+            AtomicInteger successCount = new AtomicInteger(0);
+            AtomicInteger failCount = new AtomicInteger(0);
+
+            // when
+            runConcurrent(threadCount, () -> {
+                try {
+                    ProductCommand.DeductStock.Item item = new ProductCommand.DeductStock.Item(
+                        option.id(), deductQuantity
+                    );
+                    ProductCommand.DeductStock command = new ProductCommand.DeductStock(List.of(item));
+                    productService.deductStock(command);
+                    successCount.incrementAndGet();
+                } catch (Exception e) {
+                    failCount.incrementAndGet();
+                }
+            });
+
+            // then
+            Optional<ProductOption> updatedOption = productOptionJpaRepository.findById(option.id());
+            assertThat(updatedOption).isPresent();
+            assertThat(updatedOption.get().stock()).isEqualTo(0); // 재고가 모두 소진되어야 함
+            assertThat(successCount.get()).isEqualTo(4); // 성공 카운트는 4여야 함 (20 / 5 = 4)
+            assertThat(failCount.get()).isEqualTo(6); // 나머지 6개는 실패해야 함
+        }
+
+        @Test
+        void 여러_스레드가_동시에_재고_차감시_정확히_차감된다() throws InterruptedException {
+            // given
+            ProductOption option = productOptionJpaRepository.save(
+                new ProductOptionFixture()
+                    .setId(null)
+                    .setProduct(product)
+                    .setStock(1000)
+                    .create()
+            );
+            
+            int threadCount = 10;
+            int deductQuantity = 10;
+            int expectedFinalStock = option.stock() - (threadCount * deductQuantity);
+            
+            // when
+            runConcurrent(threadCount, () -> {
+                ProductCommand.DeductStock.Item item = new ProductCommand.DeductStock.Item(
+                    option.id(), deductQuantity
+                );
+                ProductCommand.DeductStock command = new ProductCommand.DeductStock(List.of(item));
+                productService.deductStock(command);
+            });
+            
+            // then
+            Optional<ProductOption> updatedOption = productOptionJpaRepository.findById(option.id());
+            assertThat(updatedOption).isPresent();
+            assertThat(updatedOption.get().stock()).isEqualTo(expectedFinalStock);
+        }
+        
+        @Test
+        void 서로_다른_차감량으로_동시에_재고_차감시_정확히_차감된다() throws InterruptedException {
+            // given
+            ProductOption option = productOptionJpaRepository.save(
+                new ProductOptionFixture()
+                    .setId(null)
+                    .setProduct(product)
+                    .setStock(1000)
+                    .create()
+            );
+            
+            int[] deductQuantities = {10, 20, 30, 40, 50};
+            int expectedTotalDeduct = 0;
+            for (int amount : deductQuantities) {
+                expectedTotalDeduct += amount;
+            }
+            int expectedFinalStock = option.stock() - expectedTotalDeduct;
+            
+            // when
+            runConcurrent(deductQuantities.length, (index) -> {
+                ProductCommand.DeductStock.Item item = new ProductCommand.DeductStock.Item(
+                    option.id(), deductQuantities[index]
+                );
+                ProductCommand.DeductStock command = new ProductCommand.DeductStock(List.of(item));
+                productService.deductStock(command);
+            });
+            
+            // then
+            Optional<ProductOption> updatedOption = productOptionJpaRepository.findById(option.id());
+            assertThat(updatedOption).isPresent();
+            assertThat(updatedOption.get().stock()).isEqualTo(expectedFinalStock);
+        }
+        
+        @Test
+        void 여러_상품_옵션의_재고를_동시에_차감() throws InterruptedException {
+            // given
+            ProductOption firstOption = productOptionJpaRepository.save(
+                new ProductOptionFixture()
+                    .setId(null)
+                    .setProduct(product)
+                    .setStock(500)
+                    .create()
+            );
+            
+            ProductOption secondOption = productOptionJpaRepository.save(
+                new ProductOptionFixture()
+                    .setId(null)
+                    .setProduct(product)
+                    .setStock(500)
+                    .create()
+            );
+            
+            int threadCount = 10;
+            int deductQuantity = 10;
+            
+            int expectedFirstStock = firstOption.stock() - (threadCount * deductQuantity);
+            int expectedSecondStock = secondOption.stock() - (threadCount * deductQuantity);
+            
+            // when
+            runConcurrent(threadCount, () -> {
+                ProductCommand.DeductStock.Item firstItem = new ProductCommand.DeductStock.Item(
+                    firstOption.id(), deductQuantity
+                );
+                ProductCommand.DeductStock.Item secondItem = new ProductCommand.DeductStock.Item(
+                    secondOption.id(), deductQuantity
+                );
+                ProductCommand.DeductStock command = new ProductCommand.DeductStock(
+                    Arrays.asList(firstItem, secondItem)
+                );
+                productService.deductStock(command);
+            });
+            
+            // then
+            Optional<ProductOption> updatedFirstOption = productOptionJpaRepository.findById(firstOption.id());
+            Optional<ProductOption> updatedSecondOption = productOptionJpaRepository.findById(secondOption.id());
+            
+            assertThat(updatedFirstOption).isPresent();
+            assertThat(updatedFirstOption.get().stock()).isEqualTo(expectedFirstStock);
+            
+            assertThat(updatedSecondOption).isPresent();
+            assertThat(updatedSecondOption.get().stock()).isEqualTo(expectedSecondStock);
+        }
+
+        @Test
+        void 여러_스레드가_동시에_다양한_수량을_요청할때_총_수량이_재고를_초과하면_일부만_성공() throws InterruptedException {
+            // given
+            int initialStock = 100; // 초기 재고 100개
+            ProductOption option = productOptionJpaRepository.save(
+                new ProductOptionFixture()
+                    .setId(null)
+                    .setProduct(product)
+                    .setStock(initialStock)
+                    .create()
+            );
+
+            // 다양한 차감량 설정 (총합: 150 > 초기 재고 100)
+            int[] deductQuantities = {10, 20, 30, 40, 50};
+
+            AtomicInteger successCount = new AtomicInteger(0);
+            AtomicInteger failCount = new AtomicInteger(0);
+            int expectedSuccessCount = 4;
+            int expectedFailCount = 1;
+
+            // when
+            runConcurrent(deductQuantities.length, (index) -> {
+                try {
+                    ProductCommand.DeductStock.Item item = new ProductCommand.DeductStock.Item(
+                        option.id(), deductQuantities[index]
+                    );
+                    ProductCommand.DeductStock command = new ProductCommand.DeductStock(List.of(item));
+                    productService.deductStock(command);
+                    successCount.incrementAndGet();
+                } catch (Exception e) {
+                    failCount.incrementAndGet();
+                }
+            });
+
+            // then
+            Optional<ProductOption> updatedOption = productOptionJpaRepository.findById(option.id());
+            assertThat(updatedOption).isPresent();
+            assertThat(updatedOption.get().stock()).isLessThan(0); // 전부 차감됨
+            assertThat(successCount.get()).isEqualTo(expectedSuccessCount); // 성공 카운트
+            assertThat(failCount.get()).isEqualTo(expectedFailCount); // 실패 카운트
         }
     }
 } 
