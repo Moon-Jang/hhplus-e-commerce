@@ -14,6 +14,10 @@ import static kr.hhplus.ecommerce.common.support.DomainStatus.ALREADY_USED_COUPO
 import static kr.hhplus.ecommerce.common.support.DomainStatus.EXPIRED_COUPON;
 
 @Entity(name = "issued_coupons")
+@Table(indexes = {
+    @Index(name = "idx_issued_coupon_user_id", columnList = "userId"),
+    @Index(name = "idx_issued_coupon_coupon_id", columnList = "coupon_id")
+})
 @Getter
 @Accessors(fluent = true)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)

@@ -15,6 +15,10 @@ import java.util.List;
 import static kr.hhplus.ecommerce.common.support.DomainStatus.ALREADY_COMPLETED_ORDER;
 
 @Entity(name = "orders")
+@Table(indexes = {
+    @Index(name = "idx_order_user_id", columnList = "userId"),
+    @Index(name = "idx_order_issued_coupon_id", columnList = "issuedCouponId")
+})
 @Getter
 @Accessors(fluent = true)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)

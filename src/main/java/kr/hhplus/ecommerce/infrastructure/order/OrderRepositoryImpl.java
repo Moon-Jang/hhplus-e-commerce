@@ -1,32 +1,45 @@
 package kr.hhplus.ecommerce.infrastructure.order;
 
-import java.util.Arrays;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import kr.hhplus.ecommerce.domain.order.Order;
+import kr.hhplus.ecommerce.domain.order.OrderRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.stereotype.Repository;
-
-import kr.hhplus.ecommerce.domain.order.Order;
-import kr.hhplus.ecommerce.domain.order.OrderRepository;
+import static kr.hhplus.ecommerce.domain.order.QOrder.order;
+import static kr.hhplus.ecommerce.domain.order.QOrderItem.orderItem;
+import static kr.hhplus.ecommerce.domain.product.QProductOption.productOption;
 
 @Repository
+@RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
+    private final JPAQueryFactory queryFactory;
+    private final OrderJpaRepository orderJpaRepository;
+    
     @Override
     public Optional<Order> findById(Long id) {
-        // TODO: Implement me
-        return Optional.empty();
+        return orderJpaRepository.findById(id);
     }
 
     @Override
     public Order save(Order order) {
-        // TODO: Implement me
-        return null;
+        return orderJpaRepository.save(order);
     }
     
     @Override
     public List<Long> findTopSellingProductIds(int limit) {
-        // TODO: 실제 구현시 DB 쿼리로 변경 필요
-        // 임시 구현: 인기있는 상품 ID 5개를 반환
-        return Arrays.asList(1L, 2L, 3L, 4L, 5L).subList(0, Math.min(limit, 5));
+        return queryFactory
+            .select(productOption.product.id)
+            .from(order)
+            .join(order.items, orderItem)
+            .join(productOption).on(orderItem.productOptionId.eq(productOption.id))
+            .where(order.status.eq(Order.Status.COMPLETED))
+            .groupBy(productOption.product.id)
+            .orderBy(orderItem.count().desc())
+            .limit(limit)
+            .fetch();
     }
 }

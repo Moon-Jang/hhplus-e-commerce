@@ -1,32 +1,32 @@
 package kr.hhplus.ecommerce.application.product;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import kr.hhplus.ecommerce.domain.product.ProductService;
+import kr.hhplus.ecommerce.domain.product.ProductVo;
+import kr.hhplus.ecommerce.domain.product.ProductVoFixture;
+import kr.hhplus.ecommerce.domain.statistics.DailyProductSalesService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.ecommerce.domain.order.OrderService;
-import kr.hhplus.ecommerce.domain.product.ProductService;
-import kr.hhplus.ecommerce.domain.product.ProductVo;
-import kr.hhplus.ecommerce.domain.product.ProductVoFixture;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductFacadeTest {
     @InjectMocks
     private ProductFacade productFacade;
     @Mock
-    private OrderService orderService;
-    @Mock
     private ProductService productService;
+    @Mock
+    private DailyProductSalesService dailyProductSalesService;
 
     @Nested
     @DisplayName("인기 상품 목록 조회")
@@ -44,7 +44,7 @@ class ProductFacadeTest {
             ProductVo product3 = new ProductVoFixture().setId(3L).setName("인기 상품 3").create();
             List<ProductVo> products = List.of(product1, product2, product3);
             
-            when(orderService.findTopSellingProductIds(limit)).thenReturn(productIds);
+            when(dailyProductSalesService.findTopSellingProductIds(limit)).thenReturn(productIds);
             when(productService.findAllById(productIds)).thenReturn(products);
             
             // when
@@ -57,7 +57,7 @@ class ProductFacadeTest {
             assertThat(result.get(1).id()).isEqualTo(2L);
             assertThat(result.get(2).id()).isEqualTo(3L);
             
-            verify(orderService).findTopSellingProductIds(limit);
+            verify(dailyProductSalesService).findTopSellingProductIds(limit);
             verify(productService).findAllById(productIds);
         }
 
@@ -68,7 +68,7 @@ class ProductFacadeTest {
             int limit = 5;
             List<Long> emptyProductIds = List.of();
             
-            when(orderService.findTopSellingProductIds(limit)).thenReturn(emptyProductIds);
+            when(dailyProductSalesService.findTopSellingProductIds(limit)).thenReturn(emptyProductIds);
             when(productService.findAllById(emptyProductIds)).thenReturn(List.of());
             
             // when
@@ -78,7 +78,7 @@ class ProductFacadeTest {
             assertThat(result).isNotNull();
             assertThat(result).isEmpty();
             
-            verify(orderService).findTopSellingProductIds(limit);
+            verify(dailyProductSalesService).findTopSellingProductIds(limit);
             verify(productService).findAllById(emptyProductIds);
         }
     }

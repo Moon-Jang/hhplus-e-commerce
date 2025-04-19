@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import kr.hhplus.ecommerce.common.entity.BaseEntity;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import lombok.Getter;
@@ -11,6 +13,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Entity(name = "order_items")
+@Table(indexes = {
+    @Index(name = "idx_order_item_product_option_id", columnList = "productOptionId")
+})
 @Getter
 @Accessors(fluent = true)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)

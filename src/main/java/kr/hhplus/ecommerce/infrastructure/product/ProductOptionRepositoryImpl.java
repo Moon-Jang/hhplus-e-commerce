@@ -1,45 +1,41 @@
 package kr.hhplus.ecommerce.infrastructure.product;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class ProductOptionRepositoryImpl implements ProductOptionRepository {
+    private final ProductOptionJpaRepository productOptionJpaRepository;
 
     @Override
     public Optional<ProductOption> findById(long id) {
-        // TODO: Implement me
-        return Optional.empty();
+        return productOptionJpaRepository.findById(id);
     }
 
     @Override
     public List<ProductOption> findAllByIds(List<Long> ids) {
-        // TODO: Implement me
-        return Collections.emptyList();
+        return productOptionJpaRepository.findAllByIdIn(ids);
     }
 
     @Override
     public List<ProductOption> findAllByProductId(long productId) {
-        // TODO: Implement me
-        return List.of();
+        return productOptionJpaRepository.findAllByProductId(productId);
     }
 
     @Override
     public List<ProductOption> findAllByProductIds(List<Long> productIds) {
-        // TODO: Implement me
-        return List.of();
+        return productOptionJpaRepository.findAllByProductIdIn(productIds);
     }
 
     @Override
     public ProductOption save(ProductOption productOption) {
-        // TODO: Implement me
-        return null;
+        return productOptionJpaRepository.save(productOption);
     }
 } 
