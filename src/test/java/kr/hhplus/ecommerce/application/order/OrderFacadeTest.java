@@ -104,10 +104,10 @@ class OrderFacadeTest {
             assertThat(throwable).isInstanceOf(RuntimeException.class);
             assertThat(throwable).hasMessage("결제 실패");
             verify(orderService).create(command);
-            verify(productService).deductStock(any(ProductCommand.DeductStock.class));
             verify(issuedCouponService).use(anyLong());
             verify(userPointService).use(any(UserPointCommand.Use.class));
             verify(paymentService).pay(any(PaymentCommand.Pay.class));
+            verify(productService,never()).deductStock(any(ProductCommand.DeductStock.class));
             verify(orderService, never()).complete(any(OrderCommand.Complete.class));
         }
         

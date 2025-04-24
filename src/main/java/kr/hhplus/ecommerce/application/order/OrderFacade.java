@@ -28,10 +28,10 @@ public class OrderFacade {
     @Transactional
     public OrderVo process(OrderCommand.Create command) {
         OrderVo order = orderService.create(command);
-        productService.deductStock(deductStockCommand(order));
         order.issuedCouponId().ifPresent(issuedCouponService::use);
         userPointService.use(new UserPointCommand.Use(command.userId(), order.finalAmount().intValue()));
         paymentService.pay(new PaymentCommand.Pay(order.id()));
+        productService.deductStock(deductStockCommand(order));
         return orderService.complete(new OrderCommand.Complete(order.id()));
     }
 
