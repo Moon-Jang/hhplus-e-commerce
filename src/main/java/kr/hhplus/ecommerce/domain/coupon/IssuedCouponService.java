@@ -20,10 +20,14 @@ public class IssuedCouponService {
 
     @Transactional
     public IssuedCouponVo issue(CouponCommand.Issue command) {
+        if (issuedCouponRepository.isAlreadyIssued(command.couponId(), command.userId())) {
+            throw new BadRequestException(COUPON_ALREADY_ISSUED);
+        }
+
         User user = userRepository.findById(command.userId())
                 .filter(User::isActive)
                 .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-        Coupon coupon = couponRepository.findById(command.couponId())
+        Coupon coupon = couponRepository.findByIdWithLock(command.couponId())
                 .orElseThrow(() -> new NotFoundException(COUPON_NOT_FOUND));
 
         IssuedCoupon issuedCoupon = coupon.issue(user.id());

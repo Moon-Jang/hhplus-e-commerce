@@ -397,12 +397,19 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             assertThat(updatedCoupon).isPresent();
             assertThat(updatedCoupon.get().issuedQuantity()).isEqualTo(initialQuantity + threadCount);
 
-            for (User testUser : users) {
-                List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(testUser.id());
-                assertThat(issuedCoupons).hasSize(1);
-                assertThat(issuedCoupons.get(0).coupon().id()).isEqualTo(limitedCoupon.id());
-                assertThat(issuedCoupons.get(0).isUsed()).isFalse();
-            }
+            withManualSession(entityManger -> {
+                for (User testUser : users) {
+                    List<IssuedCoupon> issuedCoupons = entityManger.createQuery(
+                        "SELECT ic FROM issued_coupons ic WHERE ic.userId = :userId",
+                            IssuedCoupon.class
+                        )
+                        .setParameter("userId", testUser.id())
+                        .getResultList();
+                    assertThat(issuedCoupons).hasSize(1);
+                    assertThat(issuedCoupons.get(0).coupon().id()).isEqualTo(limitedCoupon.id());
+                    assertThat(issuedCoupons.get(0).isUsed()).isFalse();
+                }
+            });
         }
     }
 } 

@@ -50,7 +50,7 @@ public class IssuedCouponServiceTest {
             IssuedCoupon issuedCoupon = new IssuedCouponFixture().create();
 
             given(userRepository.findById(userId)).willReturn(Optional.of(user));
-            given(couponRepository.findById(couponId)).willReturn(Optional.of(coupon));
+            given(couponRepository.findByIdWithLock(couponId)).willReturn(Optional.of(coupon));
             given(issuedCouponRepository.save(any(IssuedCoupon.class))).willReturn(issuedCoupon);
 
             // when
@@ -58,7 +58,7 @@ public class IssuedCouponServiceTest {
 
             // then
             verify(userRepository).findById(userId);
-            verify(couponRepository).findById(couponId);
+            verify(couponRepository).findByIdWithLock(couponId);
             verify(issuedCouponRepository).save(any(IssuedCoupon.class));
             assertThat(result).isNotNull();
         }
@@ -90,7 +90,7 @@ public class IssuedCouponServiceTest {
             CouponCommand.Issue command = new CouponCommand.Issue(userId, couponId);
             User user = new UserFixture().create();
             given(userRepository.findById(userId)).willReturn(Optional.of(user));
-            given(couponRepository.findById(couponId)).willReturn(Optional.empty());
+            given(couponRepository.findByIdWithLock(couponId)).willReturn(Optional.empty());
             
             // when
             Throwable throwable = catchThrowable(() -> service.issue(command));
@@ -99,7 +99,7 @@ public class IssuedCouponServiceTest {
             assertThat(throwable).isInstanceOf(NotFoundException.class)
                                 .hasFieldOrPropertyWithValue("status", COUPON_NOT_FOUND);
             verify(userRepository).findById(userId);
-            verify(couponRepository).findById(couponId);
+            verify(couponRepository).findByIdWithLock(couponId);
             verify(issuedCouponRepository, never()).save(any(IssuedCoupon.class));
         }
     }

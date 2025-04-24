@@ -27,4 +27,9 @@ public class IssuedCouponRepositoryImpl implements IssuedCouponRepository {
     public IssuedCoupon save(IssuedCoupon issuedCoupon) {
         return issuedCouponJpaRepository.save(issuedCoupon);
     }
+
+    @Override
+    public boolean isAlreadyIssued(long couponId, long userId) {
+        return issuedCouponJpaRepository.existsByCouponIdAndUserId(couponId, userId);
+    }
 }
