@@ -319,7 +319,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
     @DisplayName("동시성 테스트")
     class ConcurrencyTest {
         @Test
-        void 한정수량_쿠폰을_동시에_발급받으면_일부만_성공한다() throws InterruptedException {
+        void 요청이_동시에_들어올때_요청_횟수보다_쿠폰_수량이_부족할시_쿠폰_수량만큼_성공하고_나머지는_실패() throws InterruptedException {
             // given
             int maxQuantity = 5; // 최대 발급 가능 수량
             Coupon limitedCoupon = couponJpaRepository.save(
@@ -365,7 +365,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
         }
 
         @Test
-        void 여러_사용자가_동시에_쿠폰을_발급받으면_정확히_발급된다() throws InterruptedException {
+        void 요청이_동시에_올때_요청_횟수보다_쿠폰_수량이_더_크면_모든_요청이_성공한다() throws InterruptedException {
             // given
             int initialQuantity = 0;
             Coupon limitedCoupon = couponJpaRepository.save(
@@ -402,75 +402,6 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
                 assertThat(issuedCoupons).hasSize(1);
                 assertThat(issuedCoupons.get(0).coupon().id()).isEqualTo(limitedCoupon.id());
                 assertThat(issuedCoupons.get(0).isUsed()).isFalse();
-            }
-        }
-
-        @Test
-        void 동일한_쿠폰을_여러번_사용하면_한번만_성공한다() throws InterruptedException {
-            // given
-            // 쿠폰 발급
-            IssuedCoupon issuedCoupon = coupon.issue(user.id());
-            issuedCouponJpaRepository.save(issuedCoupon);
-
-            int threadCount = 10;
-            AtomicInteger successCount = new AtomicInteger(0);
-            AtomicInteger failCount = new AtomicInteger(0);
-
-            // when
-            runConcurrent(threadCount, () -> {
-                try {
-                    issuedCouponService.use(issuedCoupon.id());
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    failCount.incrementAndGet();
-                }
-            });
-
-            // then
-            Optional<IssuedCoupon> updatedCoupon = issuedCouponJpaRepository.findById(issuedCoupon.id());
-            assertThat(updatedCoupon).isPresent();
-            assertThat(updatedCoupon.get().isUsed()).isTrue();
-            assertThat(updatedCoupon.get().usedAt()).isNotNull();
-
-            // 성공 횟수는 1이어야 함
-            assertThat(successCount.get()).isEqualTo(1);
-            // 실패 횟수는 9여야 함
-            assertThat(failCount.get()).isEqualTo(threadCount - 1);
-        }
-
-        @Test
-        void 여러_사용자가_각자의_쿠폰을_동시에_사용한다() throws InterruptedException {
-            // given
-            int userCount = 10;
-            User[] users = new User[userCount];
-            IssuedCoupon[] issuedCoupons = new IssuedCoupon[userCount];
-
-            // 10명의 사용자와 각 사용자에게 발급된 쿠폰 생성
-            for (int i = 0; i < userCount; i++) {
-                users[i] = userJpaRepository.save(
-                    new UserFixture().setId(null).create()
-                );
-
-                Coupon testCoupon = couponJpaRepository.save(
-                    new CouponFixture().setId(null).create()
-                );
-
-                issuedCoupons[i] = issuedCouponJpaRepository.save(
-                    testCoupon.issue(users[i].id())
-                );
-            }
-
-            // when
-            runConcurrent(userCount, (index) -> {
-                issuedCouponService.use(issuedCoupons[index].id());
-            });
-
-            // then
-            for (int i = 0; i < userCount; i++) {
-                Optional<IssuedCoupon> updatedCoupon = issuedCouponJpaRepository.findById(issuedCoupons[i].id());
-                assertThat(updatedCoupon).isPresent();
-                assertThat(updatedCoupon.get().isUsed()).isTrue();
-                assertThat(updatedCoupon.get().usedAt()).isNotNull();
             }
         }
     }

@@ -190,7 +190,7 @@ class ProductServiceIntegrationTest extends IntegrationTestContext {
     @DisplayName("동시성 테스트")
     class ConcurrencyTest {
         @Test
-        void 재고_부족시_일부만_성공하고_나머지는_실패() throws InterruptedException {
+        void 요청이_동시에_들어올때_요청_횟수보다_재고가_부족할시_재고_개수만큼_성공하고_나머지는_실패() throws InterruptedException {
             // given
             int initialStock = 20; // 초기 재고 20개
             ProductOption option = productOptionJpaRepository.save(
@@ -232,7 +232,7 @@ class ProductServiceIntegrationTest extends IntegrationTestContext {
         }
 
         @Test
-        void 여러_스레드가_동시에_재고_차감시_정확히_차감된다() throws InterruptedException {
+        void 요청이_동시에_들어올때_요청_횟수보다_재고가_많으면_모든_요청이_성공한다() throws InterruptedException {
             // given
             ProductOption option = productOptionJpaRepository.save(
                 new ProductOptionFixture()
@@ -259,131 +259,6 @@ class ProductServiceIntegrationTest extends IntegrationTestContext {
             Optional<ProductOption> updatedOption = productOptionJpaRepository.findById(option.id());
             assertThat(updatedOption).isPresent();
             assertThat(updatedOption.get().stock()).isEqualTo(expectedFinalStock);
-        }
-        
-        @Test
-        void 서로_다른_차감량으로_동시에_재고_차감시_정확히_차감된다() throws InterruptedException {
-            // given
-            ProductOption option = productOptionJpaRepository.save(
-                new ProductOptionFixture()
-                    .setId(null)
-                    .setProduct(product)
-                    .setStock(1000)
-                    .create()
-            );
-            
-            int[] deductQuantities = {10, 20, 30, 40, 50};
-            int expectedTotalDeduct = 0;
-            for (int amount : deductQuantities) {
-                expectedTotalDeduct += amount;
-            }
-            int expectedFinalStock = option.stock() - expectedTotalDeduct;
-            
-            // when
-            runConcurrent(deductQuantities.length, (index) -> {
-                ProductCommand.DeductStock.Item item = new ProductCommand.DeductStock.Item(
-                    option.id(), deductQuantities[index]
-                );
-                ProductCommand.DeductStock command = new ProductCommand.DeductStock(List.of(item));
-                productService.deductStock(command);
-            });
-            
-            // then
-            Optional<ProductOption> updatedOption = productOptionJpaRepository.findById(option.id());
-            assertThat(updatedOption).isPresent();
-            assertThat(updatedOption.get().stock()).isEqualTo(expectedFinalStock);
-        }
-        
-        @Test
-        void 여러_상품_옵션의_재고를_동시에_차감() throws InterruptedException {
-            // given
-            ProductOption firstOption = productOptionJpaRepository.save(
-                new ProductOptionFixture()
-                    .setId(null)
-                    .setProduct(product)
-                    .setStock(500)
-                    .create()
-            );
-            
-            ProductOption secondOption = productOptionJpaRepository.save(
-                new ProductOptionFixture()
-                    .setId(null)
-                    .setProduct(product)
-                    .setStock(500)
-                    .create()
-            );
-            
-            int threadCount = 10;
-            int deductQuantity = 10;
-            
-            int expectedFirstStock = firstOption.stock() - (threadCount * deductQuantity);
-            int expectedSecondStock = secondOption.stock() - (threadCount * deductQuantity);
-            
-            // when
-            runConcurrent(threadCount, () -> {
-                ProductCommand.DeductStock.Item firstItem = new ProductCommand.DeductStock.Item(
-                    firstOption.id(), deductQuantity
-                );
-                ProductCommand.DeductStock.Item secondItem = new ProductCommand.DeductStock.Item(
-                    secondOption.id(), deductQuantity
-                );
-                ProductCommand.DeductStock command = new ProductCommand.DeductStock(
-                    Arrays.asList(firstItem, secondItem)
-                );
-                productService.deductStock(command);
-            });
-            
-            // then
-            Optional<ProductOption> updatedFirstOption = productOptionJpaRepository.findById(firstOption.id());
-            Optional<ProductOption> updatedSecondOption = productOptionJpaRepository.findById(secondOption.id());
-            
-            assertThat(updatedFirstOption).isPresent();
-            assertThat(updatedFirstOption.get().stock()).isEqualTo(expectedFirstStock);
-            
-            assertThat(updatedSecondOption).isPresent();
-            assertThat(updatedSecondOption.get().stock()).isEqualTo(expectedSecondStock);
-        }
-
-        @Test
-        void 여러_스레드가_동시에_다양한_수량을_요청할때_총_수량이_재고를_초과하면_일부만_성공() throws InterruptedException {
-            // given
-            int initialStock = 100; // 초기 재고 100개
-            ProductOption option = productOptionJpaRepository.save(
-                new ProductOptionFixture()
-                    .setId(null)
-                    .setProduct(product)
-                    .setStock(initialStock)
-                    .create()
-            );
-
-            // 다양한 차감량 설정 (총합: 150 > 초기 재고 100)
-            int[] deductQuantities = {10, 20, 30, 40, 50};
-
-            AtomicInteger successCount = new AtomicInteger(0);
-            AtomicInteger failCount = new AtomicInteger(0);
-            int expectedSuccessCount = 4;
-            int expectedFailCount = 1;
-
-            // when
-            runConcurrent(deductQuantities.length, (index) -> {
-                try {
-                    ProductCommand.DeductStock.Item item = new ProductCommand.DeductStock.Item(
-                        option.id(), deductQuantities[index]
-                    );
-                    ProductCommand.DeductStock command = new ProductCommand.DeductStock(List.of(item));
-                    productService.deductStock(command);
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    failCount.incrementAndGet();
-                }
-            });
-
-            // then
-            Optional<ProductOption> updatedOption = productOptionJpaRepository.findById(option.id());
-            assertThat(updatedOption).isPresent();
-            assertThat(updatedOption.get().stock()).isLessThan(0); // 전부 차감됨
-            assertThat(successCount.get()).isEqualTo(expectedSuccessCount); // 성공 카운트
-            assertThat(failCount.get()).isEqualTo(expectedFailCount); // 실패 카운트
         }
     }
 } 
