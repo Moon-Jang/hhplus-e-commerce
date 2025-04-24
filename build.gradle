@@ -83,9 +83,7 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform{
-        excludeTags 'integration'
-    }
+    useJUnitPlatform()
 }
 
 // Querydsl 설정부

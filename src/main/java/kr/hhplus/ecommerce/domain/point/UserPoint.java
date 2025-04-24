@@ -1,20 +1,13 @@
 package kr.hhplus.ecommerce.domain.point;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import kr.hhplus.ecommerce.common.entity.BaseEntity;
 import kr.hhplus.ecommerce.common.exception.DomainException;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.EXCEEDED_MAX_USER_POINT;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INSUFFICIENT_BALANCE;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INVALID_CHARGE_AMOUNT;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INVALID_USE_AMOUNT;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+
+import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
 
 @Entity(name = "user_points")
 @Table(indexes = {
@@ -34,7 +27,7 @@ public class UserPoint extends BaseEntity {
     private Long id;
     private long userId;
     private int amount;
-    @Version
+//    @Version
     private int version;
     
     public UserPoint(Long id, Long userId, int amount) {
