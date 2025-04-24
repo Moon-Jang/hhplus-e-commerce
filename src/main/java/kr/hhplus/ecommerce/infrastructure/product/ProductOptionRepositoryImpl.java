@@ -1,13 +1,12 @@
 package kr.hhplus.ecommerce.infrastructure.product;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Repository;
-
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,6 +16,11 @@ public class ProductOptionRepositoryImpl implements ProductOptionRepository {
     @Override
     public Optional<ProductOption> findById(long id) {
         return productOptionJpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<ProductOption> findByIdWithLock(long id) {
+        return productOptionJpaRepository.findByIdWithLock(id);
     }
 
     @Override

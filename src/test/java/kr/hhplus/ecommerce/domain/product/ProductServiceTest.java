@@ -167,7 +167,7 @@ public class ProductServiceTest {
             ProductOption option = new ProductOptionFixture()
                 .setStock(100)
                 .create();
-            given(productOptionRepository.findAllByIds(List.of(option.id()))).willReturn(List.of(option));
+            given(productOptionRepository.findByIdWithLock(option.id())).willReturn(Optional.of(option));
 
             // when
             ProductCommand.DeductStock command = new ProductCommand.DeductStock(
@@ -176,7 +176,7 @@ public class ProductServiceTest {
             service.deductStock(command);
 
             // then
-            verify(productOptionRepository).findAllByIds(List.of(option.id()));
+            verify(productOptionRepository).findByIdWithLock(option.id());
             verify(productOptionRepository).save(option);
         }
 
@@ -184,7 +184,7 @@ public class ProductServiceTest {
         void 상품_옵션이_존재하지_않는_경우_실패() {
             // given
             long notExistOptionId = 999L;
-            given(productOptionRepository.findAllByIds(List.of(notExistOptionId))).willReturn(List.of());
+            given(productOptionRepository.findByIdWithLock(notExistOptionId)).willReturn(Optional.empty());
 
             // when
             ProductCommand.DeductStock command = new ProductCommand.DeductStock(
@@ -207,8 +207,10 @@ public class ProductServiceTest {
                 .setId(existOptionId)
                 .setStock(100)
                 .create();
-            given(productOptionRepository.findAllByIds(List.of(existOptionId, notExistOptionId)))
-                .willReturn(List.of(option));
+            given(productOptionRepository.findByIdWithLock(existOptionId))
+                .willReturn(Optional.of(option));
+            given(productOptionRepository.findByIdWithLock(notExistOptionId))
+                .willReturn(Optional.empty());
 
             // when
             ProductCommand.DeductStock command = new ProductCommand.DeductStock(

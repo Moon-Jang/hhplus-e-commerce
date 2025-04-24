@@ -70,21 +70,10 @@ public class ProductService {
 
     @Transactional
     public void deductStock(ProductCommand.DeductStock command) {
-        List<Long> optionIds = command.productOptionIds();
-        Map<Long,ProductOption> optionMap = productOptionRepository.findAllByIds(optionIds)
-            .stream()
-            .collect(Collectors.toMap(ProductOption::id, option -> option));
-
-        if (optionMap.isEmpty()) {
-            throw new BadRequestException(PRODUCT_OPTION_NOT_FOUND);
-        }
-        
         command.items()
             .forEach(item -> {
-                ProductOption option = optionMap.get(item.productOptionId());
-                if (option == null) {
-                    throw new BadRequestException(PRODUCT_OPTION_NOT_FOUND);
-                }
+                ProductOption option = productOptionRepository.findByIdWithLock(item.productOptionId())
+                    .orElseThrow(() -> new BadRequestException(PRODUCT_OPTION_NOT_FOUND));
                 option.deductStock(item.quantity());
                 productOptionRepository.save(option);
             });

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 public interface ProductOptionRepository {
     Optional<ProductOption> findById(long id);
+    Optional<ProductOption> findByIdWithLock(long id);
     List<ProductOption> findAllByIds(List<Long> ids);
     List<ProductOption> findAllByProductId(long productId);
     List<ProductOption> findAllByProductIds(List<Long> productIds);
