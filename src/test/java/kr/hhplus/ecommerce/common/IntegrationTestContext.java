@@ -1,5 +1,8 @@
 package kr.hhplus.ecommerce.common;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.testcontainers.containers.MySQLContainer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 @Tag("integration")
@@ -29,6 +33,8 @@ public abstract class IntegrationTestContext {
     protected MockMvc mockMvc;
     @Autowired
     private CleanUp cleanUp;
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
 
     @AfterEach
     void tearDown() {
@@ -95,5 +101,14 @@ public abstract class IntegrationTestContext {
 
         latch.await();
         executor.shutdown();
+    }
+
+    protected void withManualSession(Consumer<EntityManager> entityManagerConsumer) {
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            EntityTransaction tx = em.getTransaction();
+            tx.begin();
+            entityManagerConsumer.accept(em);
+            tx.commit();
+        }
     }
 }
