@@ -19,6 +19,8 @@ public class UserPointRepositoryImpl implements UserPointRepository {
     
     @Override
     public UserPoint save(UserPoint userPoint) {
-        return userPointJpaRepository.save(userPoint);
+        UserPoint saved = userPointJpaRepository.save(userPoint);
+        userPointJpaRepository.flush(); // 쓰기 지연 방지
+        return saved;
     }
 }

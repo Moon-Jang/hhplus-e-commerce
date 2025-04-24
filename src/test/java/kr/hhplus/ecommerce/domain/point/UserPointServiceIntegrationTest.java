@@ -400,7 +400,6 @@ class UserPointServiceIntegrationTest extends IntegrationTestContext {
                     userPointService.charge(command);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
                     exceptions.add(e);
                     failCount.incrementAndGet();
                 }
