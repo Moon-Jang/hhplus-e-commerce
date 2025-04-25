@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.application.statistics;
+package kr.hhplus.ecommerce.interfaces.product;
 
 import kr.hhplus.ecommerce.domain.statistics.DailyProductSalesService;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +15,15 @@ import java.time.LocalDate;
 public class DailyProductSalesScheduler {
 
     private final DailyProductSalesService dailyProductSalesService;
-    
+
     /**
-     * 매일 자정에 실행되어 전날의 판매 통계를 집계합니다.
+     * 매일 00:00에 일일 상품 판매 통계 집계 작업을 수행합니다.
+     * 환불 건이 존재할 수 있으므로 일주일 이전 데이터부터 새로 집계합니다.
      */
     @Scheduled(cron = "0 0 0 * * ?", zone = "Asia/Seoul")
     @SchedulerLock(name = "aggregateDailyProductSales", lockAtLeastFor = "PT10M")
     public void aggregateDailyProductSales() {
         log.info("일일 상품 판매 통계 집계 작업 시작");
-        // 환불 건이 존재할 수 있음으로 일주일 이전 데이터부터 새로 집계
         LocalDate from = LocalDate.now().minusDays(8);
         LocalDate to = LocalDate.now().minusDays(1);
 
