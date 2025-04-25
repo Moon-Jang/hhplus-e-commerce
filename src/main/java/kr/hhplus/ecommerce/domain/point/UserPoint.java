@@ -27,8 +27,8 @@ public class UserPoint extends BaseEntity {
     private Long id;
     private long userId;
     private int amount;
-//    @Version
-    private int version;
+    @Version
+    private long version;
     
     public UserPoint(Long id, Long userId, int amount) {
         this.id = id;

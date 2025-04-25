@@ -35,6 +35,7 @@ public enum DomainStatus implements Status {
     COUPON_EXHAUSTED("쿠폰이 소진되었습니다."),
     COUPON_ISSUANCE_NOT_AVAILABLE("쿠폰 발급 가능 시간이 아닙니다."),
     COUPON_QUANTITY_EXHAUSTED("쿠폰 수량이 소진되었습니다."),
+    COUPON_ALREADY_ISSUED("이미 발급된 쿠폰입니다."),
     
     // order
     ORDER_NOT_FOUND("주문을 찾을 수 없습니다."),
