@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.common.support.utils;
+package kr.hhplus.ecommerce.infrastructure.common;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;

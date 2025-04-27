@@ -1,8 +1,8 @@
 package kr.hhplus.ecommerce.interfaces.order;
 
 import kr.hhplus.ecommerce.application.order.OrderFacade;
-import kr.hhplus.ecommerce.common.web.ApiResponse;
 import kr.hhplus.ecommerce.domain.order.OrderVo;
+import kr.hhplus.ecommerce.interfaces.common.web.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,15 +1,15 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
 import kr.hhplus.ecommerce.common.exception.BadRequestException;
-import kr.hhplus.ecommerce.common.exception.DomainException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 
 @Service
 @RequiredArgsConstructor

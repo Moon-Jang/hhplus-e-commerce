@@ -1,6 +1,6 @@
 package kr.hhplus.ecommerce.domain.order;
 
-import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.common.Money;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.ArrayList;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ALREADY_COMPLETED_ORDER;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.ALREADY_COMPLETED_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

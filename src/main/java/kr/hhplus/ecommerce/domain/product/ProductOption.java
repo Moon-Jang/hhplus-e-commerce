@@ -1,14 +1,14 @@
 package kr.hhplus.ecommerce.domain.product;
 
 import jakarta.persistence.*;
-import kr.hhplus.ecommerce.common.exception.DomainException;
 import kr.hhplus.ecommerce.domain.common.BaseEntity;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INSUFFICIENT_STOCK;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INVALID_PARAMETER;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.INSUFFICIENT_STOCK;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.INVALID_PARAMETER;
 
 @Entity(name = "product_options")
 @Table(indexes = {

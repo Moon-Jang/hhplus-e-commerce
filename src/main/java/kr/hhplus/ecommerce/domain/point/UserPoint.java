@@ -1,13 +1,13 @@
 package kr.hhplus.ecommerce.domain.point;
 
 import jakarta.persistence.*;
-import kr.hhplus.ecommerce.common.exception.DomainException;
 import kr.hhplus.ecommerce.domain.common.BaseEntity;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 
 @Entity(name = "user_points")
 @Table(indexes = {

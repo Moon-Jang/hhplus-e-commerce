@@ -1,28 +1,28 @@
 package kr.hhplus.ecommerce.domain.point;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.user.User;
+import kr.hhplus.ecommerce.domain.user.UserFixture;
+import kr.hhplus.ecommerce.domain.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_NOT_FOUND;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_POINT_NOT_FOUND;
-import kr.hhplus.ecommerce.domain.user.User;
-import kr.hhplus.ecommerce.domain.user.UserFixture;
-import kr.hhplus.ecommerce.domain.user.UserRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.USER_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.USER_POINT_NOT_FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class UserPointServiceTest {

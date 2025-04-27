@@ -1,41 +1,37 @@
 package kr.hhplus.ecommerce.domain.order;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import kr.hhplus.ecommerce.common.TestFixture;
+import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
+import kr.hhplus.ecommerce.domain.product.*;
+import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.ORDER_NOT_FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import kr.hhplus.ecommerce.common.TestFixture;
-import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ORDER_NOT_FOUND;
-import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
-import kr.hhplus.ecommerce.domain.product.Product;
-import kr.hhplus.ecommerce.domain.product.ProductFixture;
-import kr.hhplus.ecommerce.domain.product.ProductOption;
-import kr.hhplus.ecommerce.domain.product.ProductOptionFixture;
-import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
-import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {

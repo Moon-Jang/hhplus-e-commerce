@@ -1,5 +1,6 @@
-package kr.hhplus.ecommerce.common.support;
+package kr.hhplus.ecommerce.domain.common;
 
+import kr.hhplus.ecommerce.common.support.Status;
 import kr.hhplus.ecommerce.domain.point.UserPoint;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ORDER_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.ORDER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;

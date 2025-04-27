@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_NOT_FOUND;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_OPTION_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.PRODUCT_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.PRODUCT_OPTION_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

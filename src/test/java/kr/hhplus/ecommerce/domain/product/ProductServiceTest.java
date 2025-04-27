@@ -13,8 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_NOT_FOUND;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.PRODUCT_OPTION_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.PRODUCT_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.PRODUCT_OPTION_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;

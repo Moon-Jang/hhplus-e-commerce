@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ORDER_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.ORDER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

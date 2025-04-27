@@ -1,17 +1,16 @@
 package kr.hhplus.ecommerce.interfaces.product;
 
-import java.util.List;
-
+import kr.hhplus.ecommerce.application.product.ProductFacade;
+import kr.hhplus.ecommerce.domain.product.ProductService;
+import kr.hhplus.ecommerce.domain.product.ProductVo;
+import kr.hhplus.ecommerce.interfaces.common.web.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.hhplus.ecommerce.application.product.ProductFacade;
-import kr.hhplus.ecommerce.common.web.ApiResponse;
-import kr.hhplus.ecommerce.domain.product.ProductService;
-import kr.hhplus.ecommerce.domain.product.ProductVo;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/products")

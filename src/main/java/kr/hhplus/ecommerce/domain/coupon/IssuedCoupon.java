@@ -1,8 +1,8 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
 import jakarta.persistence.*;
-import kr.hhplus.ecommerce.common.exception.DomainException;
 import kr.hhplus.ecommerce.domain.common.BaseEntity;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -10,8 +10,8 @@ import lombok.experimental.Accessors;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ALREADY_USED_COUPON;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.EXPIRED_COUPON;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.ALREADY_USED_COUPON;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.EXPIRED_COUPON;
 
 @Entity(name = "issued_coupons")
 @Table(indexes = {

@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.common.web;
+package kr.hhplus.ecommerce.common.support;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;

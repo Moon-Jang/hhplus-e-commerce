@@ -1,14 +1,14 @@
 package kr.hhplus.ecommerce.domain.product;
 
-import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INSUFFICIENT_STOCK;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INVALID_PARAMETER;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.INSUFFICIENT_STOCK;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.INVALID_PARAMETER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

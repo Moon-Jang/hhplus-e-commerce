@@ -1,15 +1,15 @@
 package kr.hhplus.ecommerce.domain.point;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import kr.hhplus.ecommerce.common.exception.DomainException;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class UserPointTest {
     

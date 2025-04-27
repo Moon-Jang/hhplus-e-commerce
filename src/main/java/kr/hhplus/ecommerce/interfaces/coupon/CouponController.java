@@ -1,8 +1,8 @@
 package kr.hhplus.ecommerce.interfaces.coupon;
 
 import jakarta.validation.Valid;
-import kr.hhplus.ecommerce.common.web.ApiResponse;
 import kr.hhplus.ecommerce.domain.coupon.*;
+import kr.hhplus.ecommerce.interfaces.common.web.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

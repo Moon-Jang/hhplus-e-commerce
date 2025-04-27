@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.USER_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

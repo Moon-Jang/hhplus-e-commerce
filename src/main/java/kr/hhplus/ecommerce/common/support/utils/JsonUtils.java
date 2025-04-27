@@ -2,7 +2,7 @@ package kr.hhplus.ecommerce.common.support.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.hhplus.ecommerce.common.web.CommonObjectMapper;
+import kr.hhplus.ecommerce.common.support.CommonObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;

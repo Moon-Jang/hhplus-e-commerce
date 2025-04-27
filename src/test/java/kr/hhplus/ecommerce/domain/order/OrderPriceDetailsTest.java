@@ -1,13 +1,13 @@
 package kr.hhplus.ecommerce.domain.order;
 
 import kr.hhplus.ecommerce.common.FixtureReflectionUtils;
-import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.common.Money;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INVALID_ORDER_PRICE;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.INVALID_ORDER_PRICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

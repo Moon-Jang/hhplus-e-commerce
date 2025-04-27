@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.common.web;
+package kr.hhplus.ecommerce.interfaces.common.web;
 
 import org.springframework.data.domain.Page;
 

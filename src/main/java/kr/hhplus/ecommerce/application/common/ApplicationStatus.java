@@ -1,4 +1,6 @@
-package kr.hhplus.ecommerce.common.support;
+package kr.hhplus.ecommerce.application.common;
+
+import kr.hhplus.ecommerce.common.support.Status;
 
 public enum ApplicationStatus implements Status {
     INVALID_PARAMETER("잘못된 요청입니다."),

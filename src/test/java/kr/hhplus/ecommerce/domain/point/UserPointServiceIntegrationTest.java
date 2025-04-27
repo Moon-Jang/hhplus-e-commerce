@@ -1,8 +1,8 @@
 package kr.hhplus.ecommerce.domain.point;
 
 import kr.hhplus.ecommerce.common.IntegrationTestContext;
-import kr.hhplus.ecommerce.common.exception.DomainException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserFixture;
 import kr.hhplus.ecommerce.infrastructure.point.UserPointHistoryJpaRepository;
@@ -21,7 +21,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

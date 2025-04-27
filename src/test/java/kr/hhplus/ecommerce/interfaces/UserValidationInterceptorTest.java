@@ -1,9 +1,9 @@
 package kr.hhplus.ecommerce.interfaces;
 
 import kr.hhplus.ecommerce.common.IntegrationTestContext;
-import kr.hhplus.ecommerce.common.web.ApiResponse;
 import kr.hhplus.ecommerce.domain.user.UserService;
 import kr.hhplus.ecommerce.domain.user.UserVo;
+import kr.hhplus.ecommerce.interfaces.common.web.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

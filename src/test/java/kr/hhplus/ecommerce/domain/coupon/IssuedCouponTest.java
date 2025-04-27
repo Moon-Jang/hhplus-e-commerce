@@ -1,6 +1,6 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
-import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ALREADY_USED_COUPON;
-import static kr.hhplus.ecommerce.common.support.DomainStatus.EXPIRED_COUPON;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.ALREADY_USED_COUPON;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.EXPIRED_COUPON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

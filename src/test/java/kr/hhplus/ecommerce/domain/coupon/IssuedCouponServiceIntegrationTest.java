@@ -2,8 +2,8 @@ package kr.hhplus.ecommerce.domain.coupon;
 
 import kr.hhplus.ecommerce.common.IntegrationTestContext;
 import kr.hhplus.ecommerce.common.exception.BadRequestException;
-import kr.hhplus.ecommerce.common.exception.DomainException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserFixture;
 import kr.hhplus.ecommerce.infrastructure.coupon.CouponJpaRepository;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

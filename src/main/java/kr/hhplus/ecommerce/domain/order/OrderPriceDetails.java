@@ -2,13 +2,13 @@ package kr.hhplus.ecommerce.domain.order;
 
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.common.Money;
 import kr.hhplus.ecommerce.domain.common.MoneyConverter;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.INVALID_ORDER_PRICE;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.INVALID_ORDER_PRICE;
 
 @Embeddable
 @Getter

@@ -1,8 +1,8 @@
 package kr.hhplus.ecommerce.domain.order;
 
 import jakarta.persistence.*;
-import kr.hhplus.ecommerce.common.exception.DomainException;
 import kr.hhplus.ecommerce.domain.common.BaseEntity;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.List;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.ALREADY_COMPLETED_ORDER;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.ALREADY_COMPLETED_ORDER;
 
 @Entity(name = "orders")
 @Table(indexes = {

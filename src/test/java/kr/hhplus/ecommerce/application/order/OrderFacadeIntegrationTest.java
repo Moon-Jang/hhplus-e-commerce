@@ -1,7 +1,7 @@
 package kr.hhplus.ecommerce.application.order;
 
 import kr.hhplus.ecommerce.common.IntegrationTestContext;
-import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.coupon.*;
 import kr.hhplus.ecommerce.domain.order.OrderCommand;
 import kr.hhplus.ecommerce.domain.order.OrderVo;
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
 
-import static kr.hhplus.ecommerce.common.support.DomainStatus.*;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

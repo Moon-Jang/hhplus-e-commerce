@@ -1,8 +1,12 @@
-package kr.hhplus.ecommerce.common.exception;
+package kr.hhplus.ecommerce.interfaces.common.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import kr.hhplus.ecommerce.common.web.ApiResponse;
+import kr.hhplus.ecommerce.common.exception.BadRequestException;
+import kr.hhplus.ecommerce.common.exception.InternalErrorException;
+import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.common.exception.UnauthorizedException;
+import kr.hhplus.ecommerce.domain.common.DomainException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
