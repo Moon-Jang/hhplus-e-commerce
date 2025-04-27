@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.common.entity;
+package kr.hhplus.ecommerce.domain.common;
 
 import jakarta.persistence.*;
 import lombok.Getter;

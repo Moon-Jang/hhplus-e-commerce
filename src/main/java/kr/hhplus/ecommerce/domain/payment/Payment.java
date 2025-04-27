@@ -1,7 +1,7 @@
 package kr.hhplus.ecommerce.domain.payment;
 
 import jakarta.persistence.*;
-import kr.hhplus.ecommerce.common.entity.BaseEntity;
+import kr.hhplus.ecommerce.domain.common.BaseEntity;
 import kr.hhplus.ecommerce.domain.common.Money;
 import kr.hhplus.ecommerce.domain.common.MoneyConverter;
 import lombok.Getter;

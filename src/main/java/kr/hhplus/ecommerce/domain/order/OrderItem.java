@@ -1,12 +1,7 @@
 package kr.hhplus.ecommerce.domain.order;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
-import kr.hhplus.ecommerce.common.entity.BaseEntity;
+import jakarta.persistence.*;
+import kr.hhplus.ecommerce.domain.common.BaseEntity;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

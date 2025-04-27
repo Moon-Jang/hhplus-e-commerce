@@ -1,8 +1,8 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
 import jakarta.persistence.*;
-import kr.hhplus.ecommerce.common.entity.BaseEntity;
 import kr.hhplus.ecommerce.common.exception.DomainException;
+import kr.hhplus.ecommerce.domain.common.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
