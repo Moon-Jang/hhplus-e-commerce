@@ -23,7 +23,7 @@ spring:
     username: ${DATASOURCE_USER_NAME}
     password: ${DATASOURCE_USER_PASSWORD}
     hikari:
-      pool-name: lecture-HikariPool
+      pool-name: e-commerce-HikariPool
       maximum-pool-size: 3
       connection-timeout: 3000
       max-lifetime: 58000
