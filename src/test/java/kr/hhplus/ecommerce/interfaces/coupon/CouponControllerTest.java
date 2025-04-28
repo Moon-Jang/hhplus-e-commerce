@@ -14,6 +14,7 @@ import java.util.List;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static kr.hhplus.ecommerce.common.ApiDocumentUtils.fieldsWithBasic;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -110,6 +111,49 @@ class CouponControllerTest extends ControllerTestContext {
                                     fieldWithPath("data[].issueEndTime").type(STRING).description("쿠폰 발급 종료 시간"),
                                     fieldWithPath("data[].maxQuantity").type(NUMBER).description("최대 발급 수량"),
                                     fieldWithPath("data[].currentQuantity").type(NUMBER).description("현재 발급된 수량")
+                                )
+                            )
+                        )
+                )
+                .status(HttpStatus.OK);
+        }
+    }
+
+    @Nested
+    @DisplayName("쿠폰 상세 조회")
+    class GetCouponDetailTest {
+        private static final String DESCRIPTION = Tags.COUPON.descriptionWith("상세 조회");
+
+        @Test
+        void 쿠폰_상세_조회_성공() throws Exception {
+            // given
+            CouponVo coupon = CouponVo.from(new CouponFixture().create());
+            doReturn(coupon)
+                .when(couponService)
+                .getCouponDetail(anyLong());
+
+            // when/then
+            given()
+                .when()
+                .get("/v1/coupons/{couponId}", 1L)
+                .then()
+                .log().all()
+                .apply(
+                    document(
+                        identifier("getCouponDetail"),
+                        new ResourceSnippetParametersBuilder()
+                            .tag(TAG)
+                            .description(DESCRIPTION)
+                            .responseFields(
+                                fieldsWithBasic(
+                                    fieldWithPath("data").type(OBJECT).description("쿠폰 상세 정보"),
+                                    fieldWithPath("data.id").type(NUMBER).description("쿠폰 ID"),
+                                    fieldWithPath("data.name").type(STRING).description("쿠폰 이름"),
+                                    fieldWithPath("data.discountAmount").type(NUMBER).description("할인 금액"),
+                                    fieldWithPath("data.issueStartTime").type(STRING).description("쿠폰 발급 시작 시간"),
+                                    fieldWithPath("data.issueEndTime").type(STRING).description("쿠폰 발급 종료 시간"),
+                                    fieldWithPath("data.maxQuantity").type(NUMBER).description("최대 발급 수량"),
+                                    fieldWithPath("data.currentQuantity").type(NUMBER).description("현재 발급된 수량")
                                 )
                             )
                         )

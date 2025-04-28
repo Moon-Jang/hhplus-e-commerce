@@ -36,4 +36,13 @@ public class CouponController {
                 .toList()
         );
     }
+
+    @GetMapping("/{couponId}")
+    ApiResponse<CouponResponse.CouponSummary> getCouponDetail(@PathVariable long couponId) {
+        CouponVo coupon = couponService.getCouponDetail(couponId);
+        
+        return ApiResponse.success(
+            CouponResponse.CouponSummary.from(coupon)
+        );
+    }
 } 
