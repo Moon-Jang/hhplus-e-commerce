@@ -19,19 +19,4 @@ public class ApplicationConfiguration {
     public ObjectMapper objectMapper() {
         return new CommonObjectMapper();
     }
-
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
-    @Bean
-    JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
-    
-    @Bean
-    NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
-        return new NamedParameterJdbcTemplate(dataSource);
-    }
 }
