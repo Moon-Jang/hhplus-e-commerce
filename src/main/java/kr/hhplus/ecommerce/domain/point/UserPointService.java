@@ -1,5 +1,6 @@
 package kr.hhplus.ecommerce.domain.point;
 
+import kr.hhplus.ecommerce.common.aspect.DistributedLock;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserRepository;
@@ -17,6 +18,7 @@ public class UserPointService {
     private final UserPointRepository userPointRepository;
     private final UserPointHistoryRepository userPointHistoryRepository;
 
+    @DistributedLock(key = "'POINT::' + #command.userId")
     @Transactional
     public UserPointVo charge(UserPointCommand.Charge command) {
         User user = userRepository.findById(command.userId())

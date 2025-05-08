@@ -1,5 +1,6 @@
 package kr.hhplus.ecommerce.application.order;
 
+import kr.hhplus.ecommerce.common.aspect.DistributedLock;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponService;
 import kr.hhplus.ecommerce.domain.order.OrderCommand;
 import kr.hhplus.ecommerce.domain.order.OrderService;
@@ -25,6 +26,7 @@ public class OrderFacade {
     private final ProductService productService;
     private final UserPointService userPointService;
 
+    @DistributedLock(key = "'POINT::' + #command.userId")
     @Transactional
     public OrderVo process(OrderCommand.Create command) {
         OrderVo order = orderService.create(command);
