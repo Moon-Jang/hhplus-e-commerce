@@ -1,7 +1,9 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.config.CacheNames;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class CouponService {
             .collect(Collectors.toList());
     }
 
+    @Cacheable(value = CacheNames.COUPON_DETAILS, key = "#id")
     @Transactional(readOnly = true)
     public CouponVo getCouponDetail(long id) {
         return couponRepository.findById(id)
