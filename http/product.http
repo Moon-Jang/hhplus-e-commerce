@@ -2,3 +2,8 @@
 @limit = 10
 GET {{host}}/v1/products/top-selling?limit={{limit}}
 Accept: application/json
+
+### 상품 상세 조회
+@productId = 1
+GET {{host}}/v1/products/{{productId}}
+Accept: application/json
