@@ -2,7 +2,10 @@ package kr.hhplus.ecommerce.domain.product;
 
 import kr.hhplus.ecommerce.common.exception.BadRequestException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.config.CacheNames;
+import kr.hhplus.ecommerce.domain.common.CacheTemplate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,7 @@ import static kr.hhplus.ecommerce.domain.common.DomainStatus.PRODUCT_OPTION_NOT_
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
+    private final CacheTemplate cacheTemplate;
 
     @Transactional(readOnly = true)
     public List<ProductVo> findAll() {
@@ -60,6 +64,7 @@ public class ProductService {
             .toList();
     }
 
+    @Cacheable(value = CacheNames.PRODUCT_DETAILS, key = "#productId")
     @Transactional(readOnly = true)
     public ProductVo findById(long productId) {
         Product product = productRepository.findById(productId)
@@ -76,6 +81,7 @@ public class ProductService {
                     .orElseThrow(() -> new BadRequestException(PRODUCT_OPTION_NOT_FOUND));
                 option.deductStock(item.quantity());
                 productOptionRepository.save(option);
+                cacheTemplate.evictAsync(CacheNames.PRODUCT_DETAILS + "::" + option.product().id());
             });
     }
 }

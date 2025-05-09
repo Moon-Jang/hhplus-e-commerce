@@ -16,6 +16,9 @@ spring:
       pageable:
         default-page-size: 20
         one-indexed-parameters: true
+    redis:
+      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:localhost}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

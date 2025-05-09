@@ -1,0 +1,4 @@
+### 쿠폰 상세 조회
+@couponId = 1
+GET {{host}}/v1/coupons/{{couponId}}
+Accept: application/json
