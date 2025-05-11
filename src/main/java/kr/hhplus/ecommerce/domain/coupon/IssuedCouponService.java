@@ -1,11 +1,14 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
+import kr.hhplus.ecommerce.common.aspect.DistributedLock;
 import kr.hhplus.ecommerce.common.exception.BadRequestException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.config.CacheNames;
 import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,8 @@ public class IssuedCouponService {
     private final CouponRepository couponRepository;
     private final UserRepository userRepository;
 
+    @CacheEvict(value = CacheNames.COUPON_DETAILS, key = "#command.couponId")
+    @DistributedLock(key = "'ISSUE-COUPON::' + #command.couponId")
     @Transactional
     public IssuedCouponVo issue(CouponCommand.Issue command) {
         if (issuedCouponRepository.isAlreadyIssued(command.couponId(), command.userId())) {
@@ -27,7 +32,7 @@ public class IssuedCouponService {
         User user = userRepository.findById(command.userId())
                 .filter(User::isActive)
                 .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-        Coupon coupon = couponRepository.findByIdWithLock(command.couponId())
+        Coupon coupon = couponRepository.findById(command.couponId())
                 .orElseThrow(() -> new NotFoundException(COUPON_NOT_FOUND));
 
         IssuedCoupon issuedCoupon = coupon.issue(user.id());

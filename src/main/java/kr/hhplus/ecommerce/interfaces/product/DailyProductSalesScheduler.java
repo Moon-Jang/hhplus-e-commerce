@@ -1,5 +1,6 @@
 package kr.hhplus.ecommerce.interfaces.product;
 
+import kr.hhplus.ecommerce.application.product.ProductFacade;
 import kr.hhplus.ecommerce.domain.statistics.DailyProductSalesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,8 @@ import java.time.LocalDate;
 @Component
 @RequiredArgsConstructor
 public class DailyProductSalesScheduler {
-
     private final DailyProductSalesService dailyProductSalesService;
+    private final ProductFacade productFacade;
 
     /**
      * 매일 00:00에 일일 상품 판매 통계 집계 작업을 수행합니다.
@@ -29,6 +30,7 @@ public class DailyProductSalesScheduler {
 
         try {
             dailyProductSalesService.aggregate(from, to);
+            productFacade.refreshTopSellingProducts(10);
             log.info("일일 상품 판매 통계 집계 작업 완료");
         } catch (Exception e) {
             log.error("일일 상품 판매 통계 집계 작업 실패", e);

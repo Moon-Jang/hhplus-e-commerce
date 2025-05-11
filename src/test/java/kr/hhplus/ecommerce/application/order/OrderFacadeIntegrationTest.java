@@ -6,7 +6,9 @@ import kr.hhplus.ecommerce.domain.coupon.*;
 import kr.hhplus.ecommerce.domain.order.OrderCommand;
 import kr.hhplus.ecommerce.domain.order.OrderVo;
 import kr.hhplus.ecommerce.domain.point.UserPoint;
+import kr.hhplus.ecommerce.domain.point.UserPointCommand;
 import kr.hhplus.ecommerce.domain.point.UserPointFixture;
+import kr.hhplus.ecommerce.domain.point.UserPointService;
 import kr.hhplus.ecommerce.domain.product.Product;
 import kr.hhplus.ecommerce.domain.product.ProductFixture;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
@@ -20,6 +22,8 @@ import kr.hhplus.ecommerce.infrastructure.point.UserPointJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.product.ProductJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.product.ProductOptionJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.user.UserJpaRepository;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,7 +42,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
     private OrderFacade orderFacade;
     @Autowired
     private IssuedCouponService issuedCouponService;
-    
+    @Autowired
+    private UserPointService userPointService;
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
@@ -270,6 +275,116 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
             // 포인트가 사용되지 않았는지 확인
             UserPoint updatedPoint = userPointJpaRepository.findById(userPoint.id()).orElseThrow();
             assertThat(updatedPoint.amount()).isEqualTo(userPoint.amount());
+        }
+    }
+
+    @Nested
+    @DisplayName("동시성 테스트")
+    class ConcurrencyTest {
+        @Test
+        void 동일한_유저의_요청이_동시에_들어오면_순차적으로_처리된다() throws InterruptedException {
+            // given
+            SetUpData setUpData = new SetUpData().setUp();
+            int requestQuantity = 1;
+            OrderCommand.Create command = new OrderCommand.Create(
+                setUpData.user.id(),
+                List.of(new OrderCommand.Create.OrderItem(setUpData.productOption.id(), requestQuantity)),
+                Optional.empty()
+            );
+            int threadCount = 3;
+            int initialStock = setUpData.productOption.stock();
+            int initialPoint = setUpData.userPoint.amount();
+            int expectedStock = initialStock - (threadCount * requestQuantity);
+            int expectedPoint = initialPoint - (threadCount * setUpData.productOption.price() * requestQuantity);
+
+            // when
+            runConcurrent(threadCount, () ->  orderFacade.process(command));
+
+            // then
+            assertThat(orderJpaRepository.count()).isEqualTo(threadCount);
+
+            ProductOption updatedOption = productOptionJpaRepository.findById(setUpData.productOption.id()).orElseThrow();
+            assertThat(updatedOption.stock()).isEqualTo(expectedStock);
+
+            UserPoint updatedPoint = userPointJpaRepository.findById(setUpData.userPoint.id()).orElseThrow();
+            assertThat(updatedPoint.amount()).isEqualTo(expectedPoint);
+        }
+
+        @Test
+        void 주문_결제와_포인트_충전이_동시에_발생해도_포인트_데이터의_정합성이_유지된다() throws InterruptedException {
+            // given
+            SetUpData setUpData = new SetUpData()
+
+                .setUp();
+            int requestQuantity = 1;
+            OrderCommand.Create orderCommand = new OrderCommand.Create(
+                setUpData.user.id(),
+                List.of(new OrderCommand.Create.OrderItem(setUpData.productOption.id(), requestQuantity)),
+                Optional.empty()
+            );
+            UserPointCommand.Charge chargeCommand = new UserPointCommand.Charge(
+                setUpData.user.id(),
+                100
+            );
+            int initialPoint = setUpData.userPoint.amount();
+            int expectedPoint = initialPoint - (setUpData.productOption.price() * requestQuantity) + chargeCommand.amount();
+
+            // when
+            runConcurrent(new Runnable[]{
+                () -> orderFacade.process(orderCommand),
+                () -> userPointService.charge(chargeCommand)
+            });
+
+            // then
+            assertThat(orderJpaRepository.count()).isEqualTo(1);
+
+            UserPoint updatedPoint = userPointJpaRepository.findById(setUpData.userPoint.id()).orElseThrow();
+            assertThat(updatedPoint.amount()).isEqualTo(expectedPoint);
+        }
+    }
+
+    @Setter
+    @Accessors(chain = true)
+    private class SetUpData {
+        public User user;
+        public UserPoint userPoint;
+        public Product product;
+        public ProductOption productOption;
+        public Coupon coupon;
+        public IssuedCoupon issuedCoupon;
+        public UserFixture userFixture = new UserFixture();
+        public UserPointFixture userPointFixture = new UserPointFixture();
+        public ProductFixture productFixture = new ProductFixture();
+        public ProductOptionFixture productOptionFixture = new ProductOptionFixture();
+        public CouponFixture couponFixture;
+        public IssuedCouponFixture issuedCouponFixture;
+
+        public SetUpData setUp() {
+            user = userJpaRepository.save(userFixture.setId(null).create());
+            userPoint = userPointJpaRepository.save(userPointFixture
+                .setId(null)
+                .setUserId(user.id())
+                .setAmount(UserPoint.MAX_BALANCE - 100_000)
+                .create());
+            product = productJpaRepository.save(productFixture.setId(null).setPrice(10000).create());
+            productOption = productOptionJpaRepository.save(productOptionFixture
+                .setId(null)
+                .setProduct(product)
+                .setStock(100)
+                .create());
+
+            if (couponFixture != null) {
+                coupon = couponJpaRepository.save(couponFixture.setId(null).create());
+            }
+
+            if (issuedCouponFixture != null) {
+                issuedCoupon = issuedCouponJpaRepository.save(issuedCouponFixture
+                    .setId(null)
+                    .setUserId(user.id())
+                    .setCoupon(coupon)
+                    .create());
+            }
+            return this;
         }
     }
 } 

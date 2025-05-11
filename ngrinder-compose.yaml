@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  controller:
+    image: ngrinder/controller
+    container_name: ngrinder-controller
+    # 호스트의 ngrinder-controller 디렉터리를 컨테이너에 마운트
+    volumes:
+      - ${HOME}/.ngrinder:/opt/ngrinder-controller
+    ports:
+      - "80:80"
+      - "16001:16001"
+      - "12000-12009:12000-12009"
+    networks:
+      - ngrinder-net
+
+  agent:
+    image: ngrinder/agent
+    container_name: ngrinder-agent
+    # 컨트롤러가 먼저 준비된 후에 실행되도록 설정
+    depends_on:
+      - controller
+    networks:
+      - ngrinder-net
+
+  api:
+    platform: linux/amd64
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: api
+    env_file:
+      - ngrinder.env
+    ports:
+      - "8080:8080"
+    networks:
+      - ngrinder-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - /Users/mjjin/local-db:/var/lib/mysql
+    networks:
+      - ngrinder-net
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "63796:6379"
+    volumes:
+      - /Users/mjjin/local-redis:/data
+    networks:
+      - ngrinder-net
+
+networks:
+  ngrinder-net:
+    driver: bridge
