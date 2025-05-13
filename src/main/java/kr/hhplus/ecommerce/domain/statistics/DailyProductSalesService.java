@@ -16,7 +16,7 @@ public class DailyProductSalesService {
     private final ProductRepository productRepository;
 
     public List<Long> findTopSellingProductIds(int limit) {
-        LocalDate from = LocalDate.now().minusMonths(1);
+        LocalDate from = LocalDate.now().minusDays(3);
         LocalDate to = LocalDate.now();
         
         return dailyProductSalesRepository.findTopSellingProductIds(from, to, limit);
