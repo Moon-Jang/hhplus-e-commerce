@@ -6,6 +6,7 @@ import java.util.List;
 public interface DailyProductSalesRepository {
     List<DailyProductSales> aggregate(LocalDate date, List<Long> productIds);
     void createAll(List<DailyProductSales> dailyProductSalesList);
+    void saveDelta(DailyProductSales delta);
     void deleteAllByAggregationDate(LocalDate aggregationDate);
     List<Long> findTopSellingProductIds(LocalDate from, LocalDate to, int limit);
 }

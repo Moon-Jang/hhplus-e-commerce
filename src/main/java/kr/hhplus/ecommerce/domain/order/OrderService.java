@@ -6,8 +6,8 @@ import kr.hhplus.ecommerce.domain.coupon.CouponRepository;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
-import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +25,8 @@ public class OrderService {
     private final ProductOptionRepository productOptionRepository;
     private final IssuedCouponRepository issuedCouponRepository;
     private final CouponRepository couponRepository;
-    private final DataPlatFormClient dataPlatFormClient;
-    
+    private final ApplicationEventPublisher eventPublisher;
+
     @Transactional
     public OrderVo create(OrderCommand.Create command) {
         Order order = new Order(command.userId());
@@ -56,7 +56,7 @@ public class OrderService {
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND));
 
         order.complete();
-        dataPlatFormClient.sendOrderAsync(order.id());
+        eventPublisher.publishEvent(new OrderEvent.Complete(order.id()));
 
         return OrderVo.from(
             orderRepository.save(order)

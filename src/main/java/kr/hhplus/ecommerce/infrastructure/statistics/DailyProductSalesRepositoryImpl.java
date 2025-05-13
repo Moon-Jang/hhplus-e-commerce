@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.hhplus.ecommerce.domain.order.Order;
 import kr.hhplus.ecommerce.domain.statistics.DailyProductSales;
 import kr.hhplus.ecommerce.domain.statistics.DailyProductSalesRepository;
+import kr.hhplus.ecommerce.infrastructure.statistics.DailyProductSalesRedisRepository.AggregationResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -19,13 +20,13 @@ import java.util.List;
 import static kr.hhplus.ecommerce.domain.order.QOrder.order;
 import static kr.hhplus.ecommerce.domain.order.QOrderItem.orderItem;
 import static kr.hhplus.ecommerce.domain.product.QProductOption.productOption;
-import static kr.hhplus.ecommerce.domain.statistics.QDailyProductSales.dailyProductSales;
 
 @Repository
 @RequiredArgsConstructor
 public class DailyProductSalesRepositoryImpl implements DailyProductSalesRepository {
     private final JPAQueryFactory queryFactory;
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final DailyProductSalesRedisRepository redisRepository;
 
     @Override
     public List<DailyProductSales> aggregate(LocalDate aggregationDate, List<Long> productIds) {
@@ -59,9 +60,15 @@ public class DailyProductSalesRepositoryImpl implements DailyProductSalesReposit
             VALUES (:aggregationDate, :productId, :orderCount, NOW(), NOW())
             """,
             list.stream()
+                .map(DailyProductSalesRdbEntity::from)
                 .map(BeanPropertySqlParameterSource::new)
                 .toArray(SqlParameterSource[]::new)
         );
+    }
+
+    @Override
+    public void saveDelta(DailyProductSales delta) {
+        redisRepository.saveDelta(delta);
     }
 
     @Override
@@ -74,13 +81,17 @@ public class DailyProductSalesRepositoryImpl implements DailyProductSalesReposit
 
     @Override
     public List<Long> findTopSellingProductIds(LocalDate from, LocalDate to, int limit) {
-        return queryFactory
-            .select(dailyProductSales.productId)
-            .from(dailyProductSales)
-            .where(dailyProductSales.aggregationDate.between(from, to))
-            .groupBy(dailyProductSales.productId)
-            .orderBy(dailyProductSales.orderCount.sum().desc())
-            .limit(limit)
-            .fetch();
+        List<AggregationResult> results = redisRepository.aggregateRanking(from, to, limit);
+
+        return results.stream()
+            .sorted((a,b) -> {
+                int result = Long.compare(b.salesCount(), a.salesCount());
+
+                return (result == 0)
+                    ? Long.compare(a.productId(), b.productId())
+                    : result;
+            })
+            .map(AggregationResult::productId)
+            .toList();
     }
 }

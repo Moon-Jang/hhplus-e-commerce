@@ -4,7 +4,6 @@ import kr.hhplus.ecommerce.common.TestFixture;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import kr.hhplus.ecommerce.domain.coupon.*;
 import kr.hhplus.ecommerce.domain.product.*;
-import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -16,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +25,6 @@ import static kr.hhplus.ecommerce.domain.common.DomainStatus.ORDER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,8 +42,8 @@ class OrderServiceTest {
     @Mock
     private CouponRepository couponRepository;
     @Mock
-    private DataPlatFormClient dataPlatFormClient;
-    
+    private ApplicationEventPublisher eventPublisher;
+
     @Nested
     @DisplayName("주문 생성 테스트")
     class CreateTest {
@@ -113,7 +112,7 @@ class OrderServiceTest {
             given(productOptionRepository.findAllByIds(productOptionIds)).willReturn(productOptions);
             given(orderRepository.save(any(Order.class))).willReturn(new OrderFixture().create());
             given(couponRepository.findById(issuedCoupon.couponId())).willReturn(Optional.of(coupon));
-            
+
             // when
             service.create(command);
             
@@ -177,7 +176,7 @@ class OrderServiceTest {
             // then
             ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
             verify(orderRepository).save(orderCaptor.capture());
-            verify(dataPlatFormClient).sendOrderAsync(order.id());
+            verify(eventPublisher).publishEvent(any(OrderEvent.Complete.class));
             Order capturedOrder = orderCaptor.getValue();
             assertThat(capturedOrder.id()).isEqualTo(order.id());
             assertThat(capturedOrder.status()).isEqualTo(Order.Status.COMPLETED);
@@ -199,7 +198,7 @@ class OrderServiceTest {
                 .hasMessage(ORDER_NOT_FOUND.message());
             verify(orderRepository).findById(command.orderId());
             verify(orderRepository, times(0)).save(any(Order.class));
-            verify(dataPlatFormClient, times(0)).sendOrderAsync(anyLong());
+            verify(eventPublisher, times(0)).publishEvent(any(OrderEvent.Complete.class));
         }
     }
     

@@ -12,15 +12,17 @@ import java.time.LocalDate;
 @Setter
 @Accessors(chain = true)
 public class DailyProductSalesFixture implements TestFixture<DailyProductSales> {
-    private Long id = 1L;
     private LocalDate aggregationDate = LocalDate.of(2023, 1, 1);
     private long productId = 1L;
     private long orderCount = 10L;
 
     @Override
     public DailyProductSales create() {
-        DailyProductSales entity = new DailyProductSales();
-        FixtureReflectionUtils.reflect(entity, this);
-        return entity;
+        return new DailyProductSales(
+            aggregationDate,
+            productId,
+            orderCount,
+            0L
+        );
     }
 } 
