@@ -381,7 +381,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestContext {
     @DisplayName("동시성 테스트")
     class ConcurrencyTest {
         @Test
-        void 동시에_충전_요청이_오면_하나만_성공한다() throws InterruptedException {
+        void 동시에_충전_요청이_오면_모두_성공한다() throws InterruptedException {
             // given
             UserPoint userPoint = initUserPoint(new UserPointFixture());
 
@@ -406,13 +406,11 @@ class UserPointServiceIntegrationTest extends IntegrationTestContext {
             });
 
             // then
-            assertThat(successCount.get()).isEqualTo(1);
+            assertThat(successCount.get()).isEqualTo(threadCount);
             assertThat(failCount.get()).isEqualTo(threadCount - successCount.get());
-            assertThat(exceptions).hasSize(failCount.get());
-            assertThat(exceptions).allMatch(e -> e instanceof ObjectOptimisticLockingFailureException);
 
             UserPoint resultPoint = userPointJpaRepository.findById(userPoint.id()).orElseThrow();
-            assertThat(resultPoint.amount()).isEqualTo(initialAmount + chargeAmount);
+            assertThat(resultPoint.amount()).isEqualTo(initialAmount + (chargeAmount * threadCount));
         }
 
         @Test

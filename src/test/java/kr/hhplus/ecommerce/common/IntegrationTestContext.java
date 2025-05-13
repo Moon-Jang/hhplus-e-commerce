@@ -3,6 +3,9 @@ package kr.hhplus.ecommerce.common;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
+import org.hibernate.Session;
+import org.hibernate.StatelessSession;
+import org.hibernate.Transaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.IntConsumer;
 
 @Tag("integration")
@@ -37,6 +41,8 @@ public abstract class IntegrationTestContext {
     private CleanUp cleanUp;
     @Autowired
     private EntityManagerFactory entityManagerFactory;
+    @Autowired
+    private EntityManager entityManager;
 
     @AfterEach
     void tearDown() {
@@ -114,5 +120,30 @@ public abstract class IntegrationTestContext {
             entityManagerConsumer.accept(em);
             tx.commit();
         }
+    }
+
+    protected <R> R withManualSession(Function<EntityManager,R> entityManagerConsumer) {
+        R result;
+
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            EntityTransaction tx = em.getTransaction();
+            tx.begin();
+            result = entityManagerConsumer.apply(em);
+            tx.commit();
+        }
+
+        return result;
+    }
+
+    protected <T> T persistEntity(T entity) {
+        Session session = entityManager.unwrap(Session.class);
+        StatelessSession statelessSession = session.getSessionFactory().openStatelessSession();
+        Transaction transaction = statelessSession.beginTransaction();
+
+        statelessSession.insert(entity);
+        transaction.commit();
+        statelessSession.close();
+
+        return entity;
     }
 }

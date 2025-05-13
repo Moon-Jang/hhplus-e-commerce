@@ -2,6 +2,7 @@ package kr.hhplus.ecommerce.domain.product;
 
 import kr.hhplus.ecommerce.common.exception.BadRequestException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.common.CacheTemplate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,8 @@ public class ProductServiceTest {
     private ProductRepository productRepository;
     @Mock
     private ProductOptionRepository productOptionRepository;
+    @Mock
+    private CacheTemplate cacheTemplate;
 
     @Nested
     @DisplayName("상품 목록 조회 테스트")

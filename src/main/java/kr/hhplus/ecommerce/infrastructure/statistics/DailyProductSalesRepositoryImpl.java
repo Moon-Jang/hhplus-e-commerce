@@ -55,8 +55,8 @@ public class DailyProductSalesRepositoryImpl implements DailyProductSalesReposit
 
         jdbcTemplate.batchUpdate(
             """
-            INSERT INTO daily_product_sales (aggregation_date, product_id, order_count)
-            VALUES (:aggregationDate, :productId, :orderCount)
+            INSERT INTO daily_product_sales (aggregation_date, product_id, order_count, created_at, updated_at)
+            VALUES (:aggregationDate, :productId, :orderCount, NOW(), NOW())
             """,
             list.stream()
                 .map(BeanPropertySqlParameterSource::new)
