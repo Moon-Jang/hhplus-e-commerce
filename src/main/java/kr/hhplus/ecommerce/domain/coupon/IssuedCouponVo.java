@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public record IssuedCouponVo(
     long id,
     long userId,
-    CouponVo coupon,
+    long couponId,
     LocalDate expiryDate,
     boolean isUsed,
     LocalDateTime usedAt,
@@ -16,7 +16,7 @@ public record IssuedCouponVo(
         return new IssuedCouponVo(
             issuedCoupon.id(),
             issuedCoupon.userId(),
-            CouponVo.from(issuedCoupon.coupon()),
+            issuedCoupon.couponId(),
             issuedCoupon.expiryDate(),
             issuedCoupon.isUsed(),
             issuedCoupon.usedAt(),

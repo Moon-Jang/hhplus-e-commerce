@@ -84,7 +84,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
         issuedCoupon = issuedCouponJpaRepository.save(new IssuedCouponFixture()
             .setId(null)
             .setUserId(user.id())
-            .setCoupon(coupon)
+            .setCouponId(coupon.id())
             .create());
     }
     
@@ -381,7 +381,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
                 issuedCoupon = issuedCouponJpaRepository.save(issuedCouponFixture
                     .setId(null)
                     .setUserId(user.id())
-                    .setCoupon(coupon)
+                    .setCouponId(coupon.id())
                     .create());
             }
             return this;

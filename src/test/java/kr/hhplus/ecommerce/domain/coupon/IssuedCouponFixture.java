@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 public class IssuedCouponFixture implements TestFixture<IssuedCoupon> {
     private Long id = 1L;
     private long userId = 1L;
+    private long couponId = 1L;
     private LocalDate expiryDate = LocalDate.now().plusYears(1);
     private LocalDateTime usedAt = null;
-    private Coupon coupon = new CouponFixture().create();
 
     @Override
     public IssuedCoupon create() {

@@ -2,10 +2,7 @@ package kr.hhplus.ecommerce.domain.order;
 
 import kr.hhplus.ecommerce.common.TestFixture;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
-import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
+import kr.hhplus.ecommerce.domain.coupon.*;
 import kr.hhplus.ecommerce.domain.product.*;
 import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
 import lombok.Getter;
@@ -43,6 +40,8 @@ class OrderServiceTest {
     private ProductOptionRepository productOptionRepository;
     @Mock
     private IssuedCouponRepository issuedCouponRepository;
+    @Mock
+    private CouponRepository couponRepository;
     @Mock
     private DataPlatFormClient dataPlatFormClient;
     
@@ -100,8 +99,9 @@ class OrderServiceTest {
                 new ProductOptionFixture().setId(1L).setProduct(product).create()
             );
             List<Long> productOptionIds = productOptions.stream().map(ProductOption::id).toList();
+            Coupon coupon = new CouponFixture().setDiscountAmount(100).create();
             IssuedCoupon issuedCoupon = new IssuedCouponFixture()
-                .setCoupon(new CouponFixture().setDiscountAmount(100).create())
+                .setCouponId(coupon.id())
                 .create();
             OrderCommand.Create command = new CommandFixture()
                 .setItems(List.of(
@@ -112,12 +112,14 @@ class OrderServiceTest {
             given(issuedCouponRepository.findById(issuedCoupon.id())).willReturn(Optional.of(issuedCoupon));
             given(productOptionRepository.findAllByIds(productOptionIds)).willReturn(productOptions);
             given(orderRepository.save(any(Order.class))).willReturn(new OrderFixture().create());
+            given(couponRepository.findById(issuedCoupon.couponId())).willReturn(Optional.of(coupon));
             
             // when
             service.create(command);
             
             // then
             verify(issuedCouponRepository).findById(issuedCoupon.id());
+            verify(couponRepository).findById(issuedCoupon.couponId());
             verify(productOptionRepository).findAllByIds(productOptionIds);
             ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
             verify(orderRepository).save(orderCaptor.capture());
@@ -129,7 +131,7 @@ class OrderServiceTest {
             assertThat(capturedOrder.items().get(0).quantity()).isEqualTo(command.items().get(0).quantity());
             assertThat(capturedOrder.items().get(0).amount()).isEqualTo(productOptions.get(0).product().price() * command.items().get(0).quantity());
             assertThat(capturedOrder.priceDetails().totalAmount().intValue()).isEqualTo(capturedOrder.items().stream().mapToLong(OrderItem::amount).sum());
-            assertThat(capturedOrder.priceDetails().discountAmount().intValue()).isEqualTo(issuedCoupon.coupon().discountAmount());
+            assertThat(capturedOrder.priceDetails().discountAmount().intValue()).isEqualTo(coupon.discountAmount());
             assertThat(capturedOrder.priceDetails().finalAmount().intValue()).isEqualTo(capturedOrder.priceDetails().totalAmount().subtract(capturedOrder.priceDetails().discountAmount()).intValue());
             assertThat(capturedOrder.issuedCouponId()).isEqualTo(issuedCoupon.id());
             assertThat(capturedOrder.status()).isEqualTo(Order.Status.PENDING);

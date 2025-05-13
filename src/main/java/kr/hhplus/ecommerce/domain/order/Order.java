@@ -3,6 +3,7 @@ package kr.hhplus.ecommerce.domain.order;
 import jakarta.persistence.*;
 import kr.hhplus.ecommerce.domain.common.BaseEntity;
 import kr.hhplus.ecommerce.domain.common.DomainException;
+import kr.hhplus.ecommerce.domain.coupon.Coupon;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import lombok.Getter;
@@ -52,10 +53,10 @@ public class Order extends BaseEntity {
         this.status = Status.COMPLETED;
     }
 
-    public void applyCoupon(IssuedCoupon issuedCoupon) {
+    public void applyCoupon(IssuedCoupon issuedCoupon, Coupon coupon) {
         issuedCoupon.validateUsable();
         this.issuedCouponId = issuedCoupon.id();
-        this.priceDetails.addDiscount(issuedCoupon.discountAmount());
+        this.priceDetails.addDiscount(coupon.discountAmount());
     }
 
     public void addItem(ProductOption productOption, int quantity) {

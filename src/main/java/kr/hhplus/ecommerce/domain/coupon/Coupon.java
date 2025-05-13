@@ -44,8 +44,8 @@ public class Coupon extends BaseEntity {
 
         return new IssuedCoupon(
             userId,
-            LocalDate.now().plusDays(this.expiryDays),
-            this
+            this.id,
+            LocalDate.now().plusDays(this.expiryDays)
         );
     }
 }

@@ -28,7 +28,7 @@ class IssuedCouponTest {
             Coupon coupon = new CouponFixture().create();
 
             // when
-            IssuedCoupon issuedCoupon = new IssuedCoupon(userId, expiryDate, coupon);
+            IssuedCoupon issuedCoupon = new IssuedCoupon(userId, coupon.id(), expiryDate);
 
             // then
             assertThat(issuedCoupon.usedAt()).isNull();

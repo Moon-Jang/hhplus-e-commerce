@@ -40,13 +40,13 @@ public class CouponResponse {
             LocalDateTime usedAt,
             LocalDateTime createdAt
     ) {
-        public static IssuedCouponDetails from(IssuedCouponVo issuedCoupon) {
+        public static IssuedCouponDetails of(IssuedCouponVo issuedCoupon, CouponVo coupon) {
             return new IssuedCouponDetails(
                     issuedCoupon.id(),
                     issuedCoupon.userId(),
-                    issuedCoupon.coupon().id(),
-                    issuedCoupon.coupon().name(),
-                    issuedCoupon.coupon().discountAmount(),
+                    coupon.id(),
+                    coupon.name(),
+                    coupon.discountAmount(),
                     issuedCoupon.expiryDate(),
                     issuedCoupon.isUsed(),
                     issuedCoupon.usedAt(),

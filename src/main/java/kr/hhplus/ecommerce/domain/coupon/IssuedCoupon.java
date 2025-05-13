@@ -26,18 +26,16 @@ public class IssuedCoupon extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private long userId;
+    private long couponId;
     private LocalDate expiryDate;
     private LocalDateTime usedAt;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_id", nullable = false)
-    private Coupon coupon;
 
     public IssuedCoupon(long userId,
-                        LocalDate expiryDate,
-                        Coupon coupon) {
+                        long couponId,
+                        LocalDate expiryDate) {
         this.userId = userId;
+        this.couponId = couponId;
         this.expiryDate = expiryDate;
-        this.coupon = coupon;
         this.usedAt = null;
     }
 
@@ -60,10 +58,6 @@ public class IssuedCoupon extends BaseEntity {
         }
 
         this.usedAt = LocalDateTime.now();
-    }
-
-    public int discountAmount() {
-        return coupon.discountAmount();
     }
 
     public void validateUsable() {

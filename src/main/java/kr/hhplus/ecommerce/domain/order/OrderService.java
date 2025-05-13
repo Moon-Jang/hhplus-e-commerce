@@ -1,6 +1,8 @@
 package kr.hhplus.ecommerce.domain.order;
 
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
+import kr.hhplus.ecommerce.domain.coupon.Coupon;
+import kr.hhplus.ecommerce.domain.coupon.CouponRepository;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
@@ -22,6 +24,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductOptionRepository productOptionRepository;
     private final IssuedCouponRepository issuedCouponRepository;
+    private final CouponRepository couponRepository;
     private final DataPlatFormClient dataPlatFormClient;
     
     @Transactional
@@ -36,7 +39,11 @@ public class OrderService {
 
         command.issuedCouponId()
             .flatMap(issuedCouponRepository::findById)
-            .ifPresent(order::applyCoupon);
+            .ifPresent(issuedCoupon -> {
+                Coupon coupon = couponRepository.findById(issuedCoupon.couponId())
+                    .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND));
+                order.applyCoupon(issuedCoupon, coupon);
+            });
 
         return OrderVo.from(
             orderRepository.save(order)

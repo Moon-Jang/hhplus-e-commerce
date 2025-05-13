@@ -60,7 +60,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
 
             // then
             assertThat(result.userId()).isEqualTo(user.id());
-            assertThat(result.coupon().id()).isEqualTo(coupon.id());
+            assertThat(result.couponId()).isEqualTo(coupon.id());
             assertThat(result.isUsed()).isFalse();
 
             Optional<Coupon> updatedCoupon = couponJpaRepository.findById(coupon.id());
@@ -70,7 +70,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(user.id());
             assertThat(issuedCoupons).hasSize(1);
             assertThat(issuedCoupons.get(0).userId()).isEqualTo(user.id());
-            assertThat(issuedCoupons.get(0).coupon().id()).isEqualTo(coupon.id());
+            assertThat(issuedCoupons.get(0).couponId()).isEqualTo(coupon.id());
             assertThat(issuedCoupons.get(0).expiryDate()).isEqualTo(LocalDate.now().plusDays(coupon.expiryDays()));
             assertThat(issuedCoupons.get(0).isUsed()).isFalse();
             assertThat(issuedCoupons.get(0).isExpired()).isFalse();
@@ -300,7 +300,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
                     .setId(null)
                     .setUserId(user.id())
                     .setExpiryDate(LocalDate.now().minusDays(1))
-                    .setCoupon(coupon)
+                    .setCouponId(coupon.id())
                     .create()
             );
 
@@ -406,7 +406,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
                         .setParameter("userId", testUser.id())
                         .getResultList();
                     assertThat(issuedCoupons).hasSize(1);
-                    assertThat(issuedCoupons.get(0).coupon().id()).isEqualTo(limitedCoupon.id());
+                    assertThat(issuedCoupons.get(0).couponId()).isEqualTo(limitedCoupon.id());
                     assertThat(issuedCoupons.get(0).isUsed()).isFalse();
                 }
             });

@@ -20,9 +20,10 @@ public class CouponController {
                                                                 @Valid @RequestBody CouponRequest.Issue request) {
         CouponCommand.Issue command = new CouponCommand.Issue(request.userId(), couponId);
         IssuedCouponVo issuedCoupon = issuedCouponService.issue(command);
+        CouponVo coupon = couponService.getCouponDetail(couponId);
         
         return ApiResponse.success(
-            CouponResponse.IssuedCouponDetails.from(issuedCoupon)
+            CouponResponse.IssuedCouponDetails.of(issuedCoupon, coupon)
         );
     }
     

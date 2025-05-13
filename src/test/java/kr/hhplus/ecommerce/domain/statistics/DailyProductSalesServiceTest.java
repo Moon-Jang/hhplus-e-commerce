@@ -35,7 +35,7 @@ public class DailyProductSalesServiceTest {
         void 인기_상품_조회_성공() {
             // given
             int limit = 5;
-            LocalDate from = LocalDate.now().minusMonths(1);
+            LocalDate from = LocalDate.now().minusDays(3);
             LocalDate to = LocalDate.now();
             List<Long> expectedProductIds = List.of(1L, 2L, 3L);
 
@@ -57,7 +57,7 @@ public class DailyProductSalesServiceTest {
         void 인기_상품이_없을때() {
             // given
             int limit = 5;
-            LocalDate from = LocalDate.now().minusMonths(1);
+            LocalDate from = LocalDate.now().minusDays(3);
             LocalDate to = LocalDate.now();
             List<Long> emptyProductIds = List.of();
 

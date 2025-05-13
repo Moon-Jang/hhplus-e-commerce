@@ -39,6 +39,9 @@ class CouponControllerTest extends ControllerTestContext {
             doReturn(IssuedCouponVo.from(new IssuedCouponFixture().create()))
                 .when(issuedCouponService)
                 .issue(any());
+            doReturn(CouponVo.from(new CouponFixture().create()))
+                .when(couponService)
+                .getCouponDetail(anyLong());
 
             // when/then
             given()

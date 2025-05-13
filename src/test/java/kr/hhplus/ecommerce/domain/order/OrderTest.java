@@ -2,6 +2,8 @@ package kr.hhplus.ecommerce.domain.order;
 
 import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.common.Money;
+import kr.hhplus.ecommerce.domain.coupon.Coupon;
+import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCoupon;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponFixture;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
@@ -104,12 +106,13 @@ class OrderTest {
                 .setStatus(Order.Status.PENDING)
                 .setPriceDetails(price)
                 .create();
-            IssuedCoupon issuedCoupon = new IssuedCouponFixture().create();
-            Money expectedDiscountAmount = price.discountAmount().plus(Money.wons(issuedCoupon.discountAmount()));
+            Coupon coupon = new CouponFixture().setDiscountAmount(1000).create();
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture().setCouponId(coupon.id()).create();
+            Money expectedDiscountAmount = price.discountAmount().plus(Money.wons(coupon.discountAmount()));
             Money expectedFinalAmount = price.totalAmount().minus(expectedDiscountAmount);
 
             // when
-            order.applyCoupon(issuedCoupon);
+            order.applyCoupon(issuedCoupon, coupon);
 
             // then
             assertThat(order.issuedCouponId()).isEqualTo(issuedCoupon.id());

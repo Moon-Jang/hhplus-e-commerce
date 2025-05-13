@@ -63,7 +63,7 @@ class CouponTest {
 
             // then
             assertThat(coupon.issuedQuantity()).isEqualTo(1);
-            assertThat(result.coupon()).isEqualTo(coupon);
+            assertThat(result.couponId()).isEqualTo(coupon.id());
             assertThat(result.userId()).isEqualTo(userId);
             assertThat(result.expiryDate()).isEqualTo(LocalDate.now().plusDays(coupon.expiryDays()));
             assertThat(result.usedAt()).isNull();
