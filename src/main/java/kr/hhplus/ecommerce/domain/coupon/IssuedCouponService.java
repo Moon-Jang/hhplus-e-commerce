@@ -20,6 +20,7 @@ public class IssuedCouponService {
     private final IssuedCouponRepository issuedCouponRepository;
     private final CouponRepository couponRepository;
     private final UserRepository userRepository;
+    private final CouponIssuanceRequestRepository couponIssuanceRequestRepository;
 
     @CacheEvict(value = CacheNames.COUPON_DETAILS, key = "#command.couponId")
     @DistributedLock(key = "'ISSUE-COUPON::' + #command.couponId")
@@ -36,6 +37,7 @@ public class IssuedCouponService {
                 .orElseThrow(() -> new NotFoundException(COUPON_NOT_FOUND));
 
         IssuedCoupon issuedCoupon = coupon.issue(user.id());
+        couponRepository.save(coupon);
 
         return IssuedCouponVo.from(
             issuedCouponRepository.save(issuedCoupon)
@@ -55,5 +57,22 @@ public class IssuedCouponService {
     public IssuedCoupon findById(long id) {
         return issuedCouponRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ISSUED_COUPON_NOT_FOUND));
+    }
+
+    public void requestIssuance(CouponCommand.RequestIssuance command) {
+        if (issuedCouponRepository.isAlreadyIssued(command.couponId(), command.userId())) {
+            throw new BadRequestException(COUPON_ALREADY_ISSUED);
+        }
+
+        if (!couponRepository.deductStock(command.couponId())) {
+            throw new BadRequestException(COUPON_EXHAUSTED);
+        }
+
+        CouponIssuanceRequest request = new CouponIssuanceRequest(
+            command.userId(),
+            command.couponId(),
+            command.requestTimeMillis()
+        );
+        couponIssuanceRequestRepository.save(request);
     }
 } 

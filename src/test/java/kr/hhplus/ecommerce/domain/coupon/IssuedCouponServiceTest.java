@@ -16,8 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static kr.hhplus.ecommerce.domain.common.DomainStatus.COUPON_NOT_FOUND;
-import static kr.hhplus.ecommerce.domain.common.DomainStatus.USER_NOT_FOUND;
+import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +34,8 @@ public class IssuedCouponServiceTest {
     private CouponRepository couponRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private CouponIssuanceRequestRepository couponIssuanceRequestRepository;
 
     @Nested
     @DisplayName("쿠폰 발급 테스트")
@@ -122,6 +123,75 @@ public class IssuedCouponServiceTest {
             assertThat(throwable).isNull();
             verify(issuedCouponRepository).findById(issuedCouponId);
             verify(issuedCouponRepository).save(any(IssuedCoupon.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("쿠폰 발급 요청 테스트")
+    class RequestIssuanceTest {
+        @Test
+        void 쿠폰_발급_요청_성공() {
+            // given
+            long userId = 1L;
+            long couponId = 1L;
+            long requestTimeMillis = System.currentTimeMillis();
+            CouponCommand.RequestIssuance command = new CouponCommand.RequestIssuance(userId, couponId, requestTimeMillis);
+            
+            given(issuedCouponRepository.isAlreadyIssued(couponId, userId)).willReturn(false);
+            given(couponRepository.deductStock(couponId)).willReturn(true);
+
+            // when
+            service.requestIssuance(command);
+
+            // then
+            verify(issuedCouponRepository).isAlreadyIssued(couponId, userId);
+            verify(couponRepository).deductStock(couponId);
+            verify(couponIssuanceRequestRepository).save(any(CouponIssuanceRequest.class));
+        }
+
+        @Test
+        void 이미_발급된_쿠폰인_경우_실패() {
+            // given
+            long userId = 1L;
+            long couponId = 1L;
+            long requestTimeMillis = System.currentTimeMillis();
+            CouponCommand.RequestIssuance command = new CouponCommand.RequestIssuance(userId, couponId, requestTimeMillis);
+            
+            given(issuedCouponRepository.isAlreadyIssued(couponId, userId)).willReturn(true);
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.requestIssuance(command));
+
+            // then
+            assertThat(throwable)
+                .isInstanceOf(BadRequestException.class)
+                .hasFieldOrPropertyWithValue("status", COUPON_ALREADY_ISSUED);
+            verify(issuedCouponRepository).isAlreadyIssued(couponId, userId);
+            verify(couponRepository, never()).deductStock(couponId);
+            verify(couponIssuanceRequestRepository, never()).save(any(CouponIssuanceRequest.class));
+        }
+
+        @Test
+        void 쿠폰_수량이_부족한_경우_실패() {
+            // given
+            long userId = 1L;
+            long couponId = 1L;
+            long requestTimeMillis = System.currentTimeMillis();
+            CouponCommand.RequestIssuance command = new CouponCommand.RequestIssuance(userId, couponId, requestTimeMillis);
+            
+            given(issuedCouponRepository.isAlreadyIssued(couponId, userId)).willReturn(false);
+            given(couponRepository.deductStock(couponId)).willReturn(false);
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.requestIssuance(command));
+
+            // then
+            assertThat(throwable)
+                .isInstanceOf(BadRequestException.class)
+                .hasFieldOrPropertyWithValue("status", COUPON_EXHAUSTED);
+            verify(issuedCouponRepository).isAlreadyIssued(couponId, userId);
+            verify(couponRepository).deductStock(couponId);
+            verify(couponIssuanceRequestRepository, never()).save(any(CouponIssuanceRequest.class));
         }
     }
 } 

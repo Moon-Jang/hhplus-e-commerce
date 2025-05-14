@@ -1,27 +1,17 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import kr.hhplus.ecommerce.domain.common.BaseEntity;
 import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.common.DomainStatus;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity(name = "coupons")
 @Getter
 @Accessors(fluent = true)
-@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class Coupon extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Coupon {
+    private final Long id;
     private String name;
     private int discountAmount;
     private LocalDateTime issueStartTime;
@@ -30,17 +20,29 @@ public class Coupon extends BaseEntity {
     private int issuedQuantity;
     private int expiryDays;
 
-    public IssuedCoupon issue(long userId) {
-        if (this.issuedQuantity >= this.maxQuantity) {
-            throw new DomainException(DomainStatus.COUPON_EXHAUSTED);
-        }
+    public Coupon(Long id,
+                  String name,
+                  int discountAmount,
+                  LocalDateTime issueStartTime,
+                  LocalDateTime issueEndTime,
+                  int maxQuantity,
+                  int issuedQuantity,
+                  int expiryDays) {
+        this.id = id;
+        this.name = name;
+        this.discountAmount = discountAmount;
+        this.issueStartTime = issueStartTime;
+        this.issueEndTime = issueEndTime;
+        this.maxQuantity = maxQuantity;
+        this.issuedQuantity = issuedQuantity;
+        this.expiryDays = expiryDays;
+    }
 
+    public IssuedCoupon issue(long userId) {
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(this.issueStartTime) || now.isAfter(this.issueEndTime)) {
             throw new DomainException(DomainStatus.COUPON_ISSUANCE_NOT_AVAILABLE);
         }
-
-        this.issuedQuantity++;
 
         return new IssuedCoupon(
             userId,

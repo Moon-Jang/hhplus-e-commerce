@@ -30,6 +30,7 @@ public class IssuedCouponRepositoryImpl implements IssuedCouponRepository {
 
     @Override
     public boolean isAlreadyIssued(long couponId, long userId) {
-        return issuedCouponJpaRepository.existsByCouponIdAndUserId(couponId, userId);
+        // TODO: 레디스에서 찾도록 수정
+        return false;
     }
 }

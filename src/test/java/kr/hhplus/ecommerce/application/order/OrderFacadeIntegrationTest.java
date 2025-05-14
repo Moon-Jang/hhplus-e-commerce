@@ -15,7 +15,6 @@ import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionFixture;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserFixture;
-import kr.hhplus.ecommerce.infrastructure.coupon.CouponJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.coupon.IssuedCouponJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.point.UserPointJpaRepository;
@@ -53,7 +52,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
     @Autowired
     private ProductOptionJpaRepository productOptionJpaRepository;
     @Autowired
-    private CouponJpaRepository couponJpaRepository;
+    private CouponRepository couponRepository;
     @Autowired
     private IssuedCouponJpaRepository issuedCouponJpaRepository;
     @Autowired
@@ -80,7 +79,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
             .setProduct(product)
             .setStock(100)
             .create());
-        coupon = couponJpaRepository.save(new CouponFixture().setId(null).create());
+        coupon = couponRepository.save(new CouponFixture().setId(null).create());
         issuedCoupon = issuedCouponJpaRepository.save(new IssuedCouponFixture()
             .setId(null)
             .setUserId(user.id())
@@ -374,7 +373,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
                 .create());
 
             if (couponFixture != null) {
-                coupon = couponJpaRepository.save(couponFixture.setId(null).create());
+                coupon = couponRepository.save(couponFixture.setId(null).create());
             }
 
             if (issuedCouponFixture != null) {

@@ -13,24 +13,49 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CouponRepositoryImpl implements CouponRepository {
     private final CouponJpaRepository couponJpaRepository;
+    private final CouponRedisRepository couponRedisRepository;
 
     @Override
     public Optional<Coupon> findById(long id) {
-        return couponJpaRepository.findById(id);
+        return couponRedisRepository.findById(id)
+            .map(CouponRedisEntity::toDomain)
+            .or(() -> couponJpaRepository.findById(id)
+                .map(CouponJpaEntity::toDomain));
     }
 
     @Override
     public Optional<Coupon> findByIdWithLock(long id) {
-        return couponJpaRepository.findByIdWithLock(id);
+        return couponJpaRepository.findByIdWithLock(id)
+            .map(CouponJpaEntity::toDomain);
     }
 
     @Override
     public List<Coupon> findAvailableCoupons(LocalDateTime dateTime) {
-        return couponJpaRepository.findAvailableCoupons(dateTime);
+        return couponJpaRepository.findAvailableCoupons(dateTime)
+            .stream()
+            .map(CouponJpaEntity::toDomain)
+            .toList();
     }
 
     @Override
     public Coupon save(Coupon coupon) {
-        return couponJpaRepository.save(coupon);
+        CouponJpaEntity jpaEntity = CouponJpaEntity.from(coupon);
+        CouponRedisEntity redisEntity;
+
+        if (jpaEntity.id() == null) {
+             Coupon saved = couponJpaRepository.save(jpaEntity)
+                .toDomain();
+            redisEntity = CouponRedisEntity.from(saved);
+        } else {
+            redisEntity = CouponRedisEntity.from(coupon);
+        }
+
+        return couponRedisRepository.save(redisEntity)
+            .toDomain();
+    }
+
+    @Override
+    public boolean deductStock(long id) {
+        return couponRedisRepository.deductStock(id);
     }
 } 
