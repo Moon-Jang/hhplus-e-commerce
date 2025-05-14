@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.config;
+package kr.hhplus.ecommerce.common.constant;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

@@ -1,7 +1,7 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
+import kr.hhplus.ecommerce.common.constant.CacheNames;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import kr.hhplus.ecommerce.config.CacheNames;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

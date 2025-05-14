@@ -1,9 +1,9 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
 import kr.hhplus.ecommerce.common.aspect.DistributedLock;
+import kr.hhplus.ecommerce.common.constant.CacheNames;
 import kr.hhplus.ecommerce.common.exception.BadRequestException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import kr.hhplus.ecommerce.config.CacheNames;
 import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserRepository;

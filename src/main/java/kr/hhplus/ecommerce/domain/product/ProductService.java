@@ -1,8 +1,8 @@
 package kr.hhplus.ecommerce.domain.product;
 
+import kr.hhplus.ecommerce.common.constant.CacheNames;
 import kr.hhplus.ecommerce.common.exception.BadRequestException;
 import kr.hhplus.ecommerce.common.exception.NotFoundException;
-import kr.hhplus.ecommerce.config.CacheNames;
 import kr.hhplus.ecommerce.domain.common.CacheTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;

@@ -3,6 +3,7 @@ package kr.hhplus.ecommerce.config;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import kr.hhplus.ecommerce.common.constant.CacheNames;
 import kr.hhplus.ecommerce.common.support.CommonObjectMapper;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;

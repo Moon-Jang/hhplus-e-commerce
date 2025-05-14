@@ -1,6 +1,6 @@
 package kr.hhplus.ecommerce.application.product;
 
-import kr.hhplus.ecommerce.config.CacheNames;
+import kr.hhplus.ecommerce.common.constant.CacheNames;
 import kr.hhplus.ecommerce.domain.product.ProductService;
 import kr.hhplus.ecommerce.domain.product.ProductVo;
 import kr.hhplus.ecommerce.domain.statistics.DailyProductSalesService;
