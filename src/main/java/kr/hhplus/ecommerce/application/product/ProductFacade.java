@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,13 +25,25 @@ public class ProductFacade {
     @Transactional(readOnly = true)
     public List<ProductVo> findTopSellingProducts(int limit) {
         List<Long> topProductIds = dailyProductSalesService.findTopSellingProductIds(limit);
-        return productService.findAllById(topProductIds);
+        Map<Long, ProductVo> productMap = productService.findAllById(topProductIds)
+            .stream()
+            .collect(Collectors.toMap(ProductVo::id, Function.identity()));
+
+        return topProductIds.stream()
+            .map(productMap::get)
+            .toList();
     }
 
     @CachePut(value = CacheNames.TOP_SELLING_PRODUCTS, key = "'limit-' + #limit")
     @Transactional(readOnly = true)
     public List<ProductVo> refreshTopSellingProducts(int limit) {
         List<Long> topProductIds = dailyProductSalesService.findTopSellingProductIds(limit);
-        return productService.findAllById(topProductIds);
+        Map<Long, ProductVo> productMap = productService.findAllById(topProductIds)
+            .stream()
+            .collect(Collectors.toMap(ProductVo::id, Function.identity()));
+
+        return topProductIds.stream()
+            .map(productMap::get)
+            .toList();
     }
 }
