@@ -15,7 +15,6 @@ import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionFixture;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserFixture;
-import kr.hhplus.ecommerce.infrastructure.coupon.IssuedCouponJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.order.OrderJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.point.UserPointJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.product.ProductJpaRepository;
@@ -54,7 +53,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
     @Autowired
     private CouponRepository couponRepository;
     @Autowired
-    private IssuedCouponJpaRepository issuedCouponJpaRepository;
+    private IssuedCouponRepository issuedCouponRepository;
     @Autowired
     private OrderJpaRepository orderJpaRepository;
 
@@ -80,7 +79,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
             .setStock(100)
             .create());
         coupon = couponRepository.save(new CouponFixture().setId(null).create());
-        issuedCoupon = issuedCouponJpaRepository.save(new IssuedCouponFixture()
+        issuedCoupon = issuedCouponRepository.save(new IssuedCouponFixture()
             .setId(null)
             .setUserId(user.id())
             .setCouponId(coupon.id())
@@ -131,7 +130,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
             assertThat(updatedPoint.amount()).isEqualTo(initialPoint - expectedFinalAmount);
 
             // 쿠폰 사용 확인
-            IssuedCoupon updatedCoupon = issuedCouponJpaRepository.findById(issuedCoupon.id()).orElseThrow();
+            IssuedCoupon updatedCoupon = issuedCouponRepository.findById(issuedCoupon.id()).orElseThrow();
             assertThat(updatedCoupon.isUsed()).isTrue();
         }
 
@@ -234,7 +233,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
             assertThat(updatedOption.stock()).isEqualTo(initialStock);
 
             // 쿠폰이 사용되지 않았는지 확인
-            IssuedCoupon updatedCoupon = issuedCouponJpaRepository.findById(issuedCoupon.id()).orElseThrow();
+            IssuedCoupon updatedCoupon = issuedCouponRepository.findById(issuedCoupon.id()).orElseThrow();
             assertThat(updatedCoupon.isUsed()).isFalse();
             
             // 포인트가 사용되지 않았는지 확인
@@ -377,7 +376,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestContext {
             }
 
             if (issuedCouponFixture != null) {
-                issuedCoupon = issuedCouponJpaRepository.save(issuedCouponFixture
+                issuedCoupon = issuedCouponRepository.save(issuedCouponFixture
                     .setId(null)
                     .setUserId(user.id())
                     .setCouponId(coupon.id())

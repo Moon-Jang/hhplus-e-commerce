@@ -6,7 +6,6 @@ import kr.hhplus.ecommerce.common.exception.NotFoundException;
 import kr.hhplus.ecommerce.domain.common.DomainException;
 import kr.hhplus.ecommerce.domain.user.User;
 import kr.hhplus.ecommerce.domain.user.UserFixture;
-import kr.hhplus.ecommerce.infrastructure.coupon.IssuedCouponJpaRepository;
 import kr.hhplus.ecommerce.infrastructure.user.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +33,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
     @Autowired
     private CouponRepository couponRepository;
     @Autowired
-    private IssuedCouponJpaRepository issuedCouponJpaRepository;
+    private IssuedCouponRepository issuedCouponRepository;
     @Autowired
     private CouponIssuanceRequestRepository couponIssuanceRequestRepository;
     @Autowired
@@ -69,7 +68,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             Optional<Coupon> updatedCoupon = couponRepository.findById(coupon.id());
             assertThat(updatedCoupon).isPresent();
 
-            List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(user.id());
+            List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findByUserId(user.id());
             assertThat(issuedCoupons).hasSize(1);
             assertThat(issuedCoupons.get(0).userId()).isEqualTo(user.id());
             assertThat(issuedCoupons.get(0).couponId()).isEqualTo(coupon.id());
@@ -94,7 +93,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
                 .hasFieldOrPropertyWithValue("status", COUPON_NOT_FOUND)
                 .hasMessage(COUPON_NOT_FOUND.message());
 
-            List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(user.id());
+            List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findByUserId(user.id());
             assertThat(issuedCoupons).isEmpty();
         }
 
@@ -121,7 +120,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             assertThat(updatedCoupon).isPresent();
             assertThat(updatedCoupon.get().issuedQuantity()).isEqualTo(futureCoupon.issuedQuantity());
 
-            List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(user.id());
+            List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findByUserId(user.id());
             assertThat(issuedCoupons).isEmpty();
         }
 
@@ -148,7 +147,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             assertThat(updatedCoupon).isPresent();
             assertThat(updatedCoupon.get().issuedQuantity()).isEqualTo(expiredCoupon.issuedQuantity());
 
-            List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(user.id());
+            List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findByUserId(user.id());
             assertThat(issuedCoupons).isEmpty();
         }
 
@@ -171,7 +170,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             assertThat(updatedCoupon).isPresent();
             assertThat(updatedCoupon.get().issuedQuantity()).isEqualTo(coupon.issuedQuantity());
 
-            List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(nonExistentUserId);
+            List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findByUserId(nonExistentUserId);
             assertThat(issuedCoupons).isEmpty();
         }
 
@@ -199,7 +198,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             assertThat(updatedCoupon).isPresent();
             assertThat(updatedCoupon.get().issuedQuantity()).isEqualTo(coupon.issuedQuantity());
 
-            List<IssuedCoupon> issuedCoupons = issuedCouponJpaRepository.findByUserId(inactiveUser.id());
+            List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findByUserId(inactiveUser.id());
             assertThat(issuedCoupons).isEmpty();
         }
     }
@@ -214,7 +213,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             // 각 테스트 전에 쿠폰 발급
             CouponCommand.Issue command = new CouponCommand.Issue(user.id(), coupon.id());
             IssuedCouponVo issuedCouponVo = issuedCouponService.issue(command);
-            issuedCoupon = issuedCouponJpaRepository.findById(issuedCouponVo.id()).orElseThrow();
+            issuedCoupon = issuedCouponRepository.findById(issuedCouponVo.id()).orElseThrow();
         }
 
         @Test
@@ -226,7 +225,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             issuedCouponService.use(issuedCouponId);
 
             // then
-            Optional<IssuedCoupon> updatedCoupon = issuedCouponJpaRepository.findById(issuedCouponId);
+            Optional<IssuedCoupon> updatedCoupon = issuedCouponRepository.findById(issuedCouponId);
             assertThat(updatedCoupon).isPresent();
             assertThat(updatedCoupon.get().isUsed()).isTrue();
             assertThat(updatedCoupon.get().usedAt()).isNotNull();
@@ -268,7 +267,7 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
         void 만료된_쿠폰_사용시_실패() {
             // given
             // 만료된 날짜를 가진 쿠폰 생성
-            IssuedCoupon expiredCoupon = issuedCouponJpaRepository.save(
+            IssuedCoupon expiredCoupon = issuedCouponRepository.save(
                 new IssuedCouponFixture()
                     .setId(null)
                     .setUserId(user.id())
@@ -359,4 +358,66 @@ class IssuedCouponServiceIntegrationTest extends IntegrationTestContext {
             assertThat(score).isNull();
         }
     }
-} 
+
+    @Nested
+    @DisplayName("대기열에서 쿠폰 발급 테스트")
+    class ReleaseFromWaitingQueueTest {
+        @Test
+        @Transactional
+        void 대기열에서_쿠폰_발급_성공() {
+            // given
+            long requestTimeMillis = System.currentTimeMillis();
+            CouponCommand.RequestIssuance command = new CouponCommand.RequestIssuance(user.id(), coupon.id(), requestTimeMillis);
+            issuedCouponService.requestIssuance(command);
+
+            // when
+            issuedCouponService.releaseFromWaitingQueue();
+
+            // then
+            List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findByUserId(user.id());
+            assertThat(issuedCoupons).hasSize(1);
+            assertThat(issuedCoupons.get(0).userId()).isEqualTo(user.id());
+            assertThat(issuedCoupons.get(0).couponId()).isEqualTo(coupon.id());
+            assertThat(issuedCoupons.get(0).isUsed()).isFalse();
+            assertThat(issuedCoupons.get(0).isExpired()).isFalse();
+            assertThat(issuedCoupons.get(0).usedAt()).isNull();
+
+            Optional<Coupon> updatedCoupon = couponRepository.findById(coupon.id());
+            assertThat(updatedCoupon).isPresent();
+            assertThat(updatedCoupon.get().issuedQuantity()).isEqualTo(1);
+        }
+
+        @Test
+        @Transactional
+        void 여러_요청이_있는_경우_모두_처리() {
+            // given
+            // 여러 사용자 생성
+            User[] users = new User[3];
+            for (int i = 0; i < users.length; i++) {
+                users[i] = userJpaRepository.save(new UserFixture().setId(null).create());
+            }
+
+            // 각 사용자별로 쿠폰 발급 요청
+            long requestTimeMillis = System.currentTimeMillis();
+            for (User testUser : users) {
+                CouponCommand.RequestIssuance command = new CouponCommand.RequestIssuance(testUser.id(), coupon.id(), requestTimeMillis);
+                issuedCouponService.requestIssuance(command);
+            }
+
+            // when
+            issuedCouponService.releaseFromWaitingQueue();
+
+            // then
+            for (User testUser : users) {
+                IssuedCoupon issuedCoupon = issuedCouponRepository.findByCouponIdAndUserId(coupon.id(), testUser.id())
+                        .orElseThrow();
+                assertThat(issuedCoupon.userId()).isEqualTo(testUser.id());
+                assertThat(issuedCoupon.couponId()).isEqualTo(coupon.id());
+            }
+
+            Optional<Coupon> updatedCoupon = couponRepository.findById(coupon.id());
+            assertThat(updatedCoupon).isPresent();
+            assertThat(updatedCoupon.get().issuedQuantity()).isEqualTo(3);
+        }
+    }
+}

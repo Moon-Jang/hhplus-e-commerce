@@ -14,12 +14,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -144,7 +146,6 @@ public class IssuedCouponServiceTest {
             service.requestIssuance(command);
 
             // then
-            verify(issuedCouponRepository).isAlreadyIssued(couponId, userId);
             verify(couponRepository).deductStock(couponId);
             verify(couponIssuanceRequestRepository).save(any(CouponIssuanceRequest.class));
         }
@@ -166,7 +167,6 @@ public class IssuedCouponServiceTest {
             assertThat(throwable)
                 .isInstanceOf(BadRequestException.class)
                 .hasFieldOrPropertyWithValue("status", COUPON_ALREADY_ISSUED);
-            verify(issuedCouponRepository).isAlreadyIssued(couponId, userId);
             verify(couponRepository, never()).deductStock(couponId);
             verify(couponIssuanceRequestRepository, never()).save(any(CouponIssuanceRequest.class));
         }
@@ -189,9 +189,81 @@ public class IssuedCouponServiceTest {
             assertThat(throwable)
                 .isInstanceOf(BadRequestException.class)
                 .hasFieldOrPropertyWithValue("status", COUPON_EXHAUSTED);
-            verify(issuedCouponRepository).isAlreadyIssued(couponId, userId);
             verify(couponRepository).deductStock(couponId);
             verify(couponIssuanceRequestRepository, never()).save(any(CouponIssuanceRequest.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("대기열에서 쿠폰 발급 테스트")
+    class ReleaseFromWaitingQueueTest {
+        @Test
+        void 대기열에서_쿠폰_발급_성공() {
+            // given
+            long userId = 1L;
+            long couponId = 1L;
+            User user = new UserFixture().create();
+            Coupon coupon = new CouponFixture().create();
+            IssuedCoupon issuedCoupon = new IssuedCouponFixture().create();
+            CouponIssuanceRequest request = new CouponIssuanceRequest(userId, couponId, System.currentTimeMillis());
+
+            given(couponIssuanceRequestRepository.findAllWaitingList(100)).willReturn(List.of(request));
+            given(userRepository.findById(userId)).willReturn(Optional.of(user));
+            given(couponRepository.findById(couponId)).willReturn(Optional.of(coupon));
+            given(issuedCouponRepository.save(any(IssuedCoupon.class))).willReturn(issuedCoupon);
+
+            // when
+            service.releaseFromWaitingQueue();
+
+            // then
+            verify(couponIssuanceRequestRepository).findAllWaitingList(100);
+            verify(userRepository).findById(userId);
+            verify(couponRepository).findById(couponId);
+            verify(issuedCouponRepository).save(any(IssuedCoupon.class));
+        }
+
+        @Test
+        void 존재하지_않는_사용자인_경우_스킵() {
+            // given
+            long userId = 1L;
+            long couponId = 1L;
+            CouponIssuanceRequest request = new CouponIssuanceRequest(userId, couponId, System.currentTimeMillis());
+
+            given(couponIssuanceRequestRepository.findAllWaitingList(100)).willReturn(List.of(request));
+            given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.releaseFromWaitingQueue());
+
+            // then
+            assertThat(throwable).isNull();
+            verify(couponIssuanceRequestRepository).findAllWaitingList(100);
+            verify(userRepository).findById(userId);
+            verify(couponRepository, never()).findById(anyLong());
+            verify(issuedCouponRepository, never()).save(any(IssuedCoupon.class));
+        }
+
+        @Test
+        void 존재하지_않는_쿠폰인_경우_스킵() {
+            // given
+            long userId = 1L;
+            long couponId = 1L;
+            User user = new UserFixture().create();
+            CouponIssuanceRequest request = new CouponIssuanceRequest(userId, couponId, System.currentTimeMillis());
+
+            given(couponIssuanceRequestRepository.findAllWaitingList(100)).willReturn(List.of(request));
+            given(userRepository.findById(userId)).willReturn(Optional.of(user));
+            given(couponRepository.findById(couponId)).willReturn(Optional.empty());
+
+            // when
+            Throwable throwable = catchThrowable(() -> service.releaseFromWaitingQueue());
+
+            // then
+            assertThat(throwable).isNull();
+            verify(couponIssuanceRequestRepository).findAllWaitingList(100);
+            verify(userRepository).findById(userId);
+            verify(couponRepository).findById(couponId);
+            verify(issuedCouponRepository, never()).save(any(IssuedCoupon.class));
         }
     }
 } 
