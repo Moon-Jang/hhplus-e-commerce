@@ -1,7 +1,10 @@
 package kr.hhplus.ecommerce.interfaces.coupon;
 
 import com.epages.restdocs.apispec.ResourceSnippetParametersBuilder;
-import kr.hhplus.ecommerce.domain.coupon.*;
+import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
+import kr.hhplus.ecommerce.domain.coupon.CouponService;
+import kr.hhplus.ecommerce.domain.coupon.CouponVo;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponService;
 import kr.hhplus.ecommerce.interfaces.ControllerTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,7 +16,6 @@ import java.util.List;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static kr.hhplus.ecommerce.common.ApiDocumentUtils.fieldsWithBasic;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
@@ -36,12 +38,6 @@ class CouponControllerTest extends ControllerTestContext {
         void 쿠폰_발급_성공() throws Exception {
             // given
             var request = new CouponRequest.Issue(1L);
-            doReturn(IssuedCouponVo.from(new IssuedCouponFixture().create()))
-                .when(issuedCouponService)
-                .issue(any());
-            doReturn(CouponVo.from(new CouponFixture().create()))
-                .when(couponService)
-                .getCouponDetail(anyLong());
 
             // when/then
             given()
@@ -61,16 +57,7 @@ class CouponControllerTest extends ControllerTestContext {
                             )
                             .responseFields(
                                 fieldsWithBasic(
-                                    fieldWithPath("data").type(OBJECT).description("응답 데이터"),
-                                    fieldWithPath("data.id").type(NUMBER).description("발급된 쿠폰 ID"),
-                                    fieldWithPath("data.userId").type(NUMBER).description("사용자 ID"),
-                                    fieldWithPath("data.couponId").type(NUMBER).description("쿠폰 ID"),
-                                    fieldWithPath("data.couponName").type(STRING).description("쿠폰 이름"),
-                                    fieldWithPath("data.discountAmount").type(NUMBER).description("할인 금액"),
-                                    fieldWithPath("data.expiryDate").type(STRING).description("쿠폰 만료일"),
-                                    fieldWithPath("data.isUsed").type(BOOLEAN).description("쿠폰 사용 여부"),
-                                    fieldWithPath("data.usedAt").type(STRING).optional().description("쿠폰 사용 일시"),
-                                    fieldWithPath("data.createdAt").type(STRING).description("쿠폰 발급 일시")
+                                    fieldWithPath("data").type(NULL).description("응답 데이터")
                                 )
                             )
                         )

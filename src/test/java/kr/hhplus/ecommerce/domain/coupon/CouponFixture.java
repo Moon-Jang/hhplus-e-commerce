@@ -1,6 +1,5 @@
 package kr.hhplus.ecommerce.domain.coupon;
 
-import kr.hhplus.ecommerce.common.FixtureReflectionUtils;
 import kr.hhplus.ecommerce.common.TestFixture;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,8 +22,15 @@ public class CouponFixture implements TestFixture<Coupon> {
 
     @Override
     public Coupon create() {
-        Coupon entity = new Coupon();
-        FixtureReflectionUtils.reflect(entity, this);
-        return entity;
+        return new Coupon(
+            id,
+            name,
+            discountAmount,
+            issueStartTime,
+            issueEndTime,
+            maxQuantity,
+            issuedQuantity,
+            expiryDays
+        );
     }
 }

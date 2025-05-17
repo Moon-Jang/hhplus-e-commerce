@@ -9,4 +9,5 @@ public interface CouponRepository {
     Optional<Coupon> findByIdWithLock(long id);
     List<Coupon> findAvailableCoupons(LocalDateTime dateTime);
     Coupon save(Coupon coupon);
-} 
+    boolean deductStock(long id);
+}

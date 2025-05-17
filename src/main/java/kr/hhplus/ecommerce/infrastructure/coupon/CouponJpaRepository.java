@@ -1,7 +1,6 @@
 package kr.hhplus.ecommerce.infrastructure.coupon;
 
 import jakarta.persistence.LockModeType;
-import kr.hhplus.ecommerce.domain.coupon.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface CouponJpaRepository extends JpaRepository<Coupon, Long> {
+public interface CouponJpaRepository extends JpaRepository<CouponJpaEntity, Long> {
     
     @Query("""
         SELECT c
@@ -20,9 +19,9 @@ public interface CouponJpaRepository extends JpaRepository<Coupon, Long> {
         AND c.issueEndTime >= :dateTime
         AND c.issuedQuantity < c.maxQuantity
     """)
-    List<Coupon> findAvailableCoupons(LocalDateTime dateTime);
+    List<CouponJpaEntity> findAvailableCoupons(LocalDateTime dateTime);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM coupons c WHERE c.id = :id")
-    Optional<Coupon> findByIdWithLock(@Param("id") long id);
+    Optional<CouponJpaEntity> findByIdWithLock(@Param("id") long id);
 }

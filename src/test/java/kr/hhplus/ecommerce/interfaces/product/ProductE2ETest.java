@@ -3,7 +3,6 @@ package kr.hhplus.ecommerce.interfaces.product;
 import kr.hhplus.ecommerce.common.IntegrationTestContext;
 import kr.hhplus.ecommerce.domain.order.Order;
 import kr.hhplus.ecommerce.domain.order.OrderFixture;
-import kr.hhplus.ecommerce.domain.order.OrderRepository;
 import kr.hhplus.ecommerce.domain.product.Product;
 import kr.hhplus.ecommerce.domain.product.ProductFixture;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
@@ -29,7 +28,6 @@ public class ProductE2ETest extends IntegrationTestContext {
     @Nested
     @DisplayName("인기 상품 목록 조회")
     class GetTopSellingProductsTest {
-        @DisplayName("")
         @Test
         void success() throws Exception {
             //given
@@ -42,10 +40,7 @@ public class ProductE2ETest extends IntegrationTestContext {
                     .create()
             );
             /* 집계 데이터 생성 */
-            dailyProductSalesService.aggregate(
-                order.createdAt().toLocalDate(),
-                order.createdAt().toLocalDate()
-            );
+            dailyProductSalesService.applySalesDelta(order.id());
 
             //when
             ResultActions result = mockMvc.perform(
