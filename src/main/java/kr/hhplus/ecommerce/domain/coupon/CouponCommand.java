@@ -6,4 +6,11 @@ public class CouponCommand {
         long couponId
     ) {
     }
+
+    public record RequestIssuance(
+        long userId,
+        long couponId,
+        long requestTimeMillis
+    ) {
+    }
 } 

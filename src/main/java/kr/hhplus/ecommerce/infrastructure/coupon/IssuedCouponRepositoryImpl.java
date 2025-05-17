@@ -12,24 +12,46 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class IssuedCouponRepositoryImpl implements IssuedCouponRepository {
     private final IssuedCouponJpaRepository issuedCouponJpaRepository;
-    
+    private final IssuedCouponRedisRepository issuedCouponRedisRepository;
+
     @Override
     public Optional<IssuedCoupon> findById(long issuedCouponId) {
-        return issuedCouponJpaRepository.findById(issuedCouponId);
+        return issuedCouponJpaRepository.findById(issuedCouponId)
+            .map(IssuedCouponJpaEntity::toDomain);
+    }
+
+    @Override
+    public Optional<IssuedCoupon> findByCouponIdAndUserId(long couponId, long userId) {
+        return issuedCouponRedisRepository.findByCouponIdAndUserId(couponId, userId)
+            .map(IssuedCouponRedisEntity::toDomain);
     }
 
     @Override
     public List<IssuedCoupon> findByUserId(long userId) {
-        return issuedCouponJpaRepository.findByUserId(userId);
+        return issuedCouponRedisRepository.findByUserId(userId)
+            .stream()
+            .map(IssuedCouponRedisEntity::toDomain)
+            .toList();
     }
 
     @Override
     public IssuedCoupon save(IssuedCoupon issuedCoupon) {
-        return issuedCouponJpaRepository.save(issuedCoupon);
+        IssuedCouponRedisEntity redisEntity;
+
+        if (issuedCoupon.id() == null || issuedCoupon.isUsed()) {
+            IssuedCoupon saved = issuedCouponJpaRepository.save(IssuedCouponJpaEntity.from(issuedCoupon))
+                .toDomain();
+            redisEntity = IssuedCouponRedisEntity.from(saved);
+        } else {
+            redisEntity = IssuedCouponRedisEntity.from(issuedCoupon);
+        }
+
+        return issuedCouponRedisRepository.save(redisEntity)
+            .toDomain();
     }
 
     @Override
     public boolean isAlreadyIssued(long couponId, long userId) {
-        return issuedCouponJpaRepository.existsByCouponIdAndUserId(couponId, userId);
+        return issuedCouponRedisRepository.existsByCouponIdAndUserId(couponId, userId);
     }
 }
