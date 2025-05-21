@@ -24,6 +24,7 @@ public class OrderService {
     private final ProductOptionRepository productOptionRepository;
     private final IssuedCouponRepository issuedCouponRepository;
     private final CouponRepository couponRepository;
+    private final OrderEventPublisher orderEventPublisher;
 
     @Transactional
     public OrderVo create(OrderCommand.Create command) {
@@ -54,6 +55,7 @@ public class OrderService {
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND));
 
         order.complete();
+        orderEventPublisher.publish(new OrderEvent.Completed(order.id()));
 
         return OrderVo.from(
             orderRepository.save(order)
