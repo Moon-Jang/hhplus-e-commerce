@@ -7,7 +7,6 @@ import kr.hhplus.ecommerce.domain.coupon.IssuedCouponRepository;
 import kr.hhplus.ecommerce.domain.product.ProductOption;
 import kr.hhplus.ecommerce.domain.product.ProductOptionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ public class OrderService {
     private final ProductOptionRepository productOptionRepository;
     private final IssuedCouponRepository issuedCouponRepository;
     private final CouponRepository couponRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public OrderVo create(OrderCommand.Create command) {
@@ -56,7 +54,6 @@ public class OrderService {
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND));
 
         order.complete();
-        eventPublisher.publishEvent(new OrderEvent.Complete(order.id()));
 
         return OrderVo.from(
             orderRepository.save(order)

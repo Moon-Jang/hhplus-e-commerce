@@ -15,7 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,8 +40,6 @@ class OrderServiceTest {
     private IssuedCouponRepository issuedCouponRepository;
     @Mock
     private CouponRepository couponRepository;
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
 
     @Nested
     @DisplayName("주문 생성 테스트")
@@ -176,7 +173,6 @@ class OrderServiceTest {
             // then
             ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
             verify(orderRepository).save(orderCaptor.capture());
-            verify(eventPublisher).publishEvent(any(OrderEvent.Complete.class));
             Order capturedOrder = orderCaptor.getValue();
             assertThat(capturedOrder.id()).isEqualTo(order.id());
             assertThat(capturedOrder.status()).isEqualTo(Order.Status.COMPLETED);
@@ -198,7 +194,6 @@ class OrderServiceTest {
                 .hasMessage(ORDER_NOT_FOUND.message());
             verify(orderRepository).findById(command.orderId());
             verify(orderRepository, times(0)).save(any(Order.class));
-            verify(eventPublisher, times(0)).publishEvent(any(OrderEvent.Complete.class));
         }
     }
     
