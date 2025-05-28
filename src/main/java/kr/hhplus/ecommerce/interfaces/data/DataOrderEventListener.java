@@ -17,6 +17,6 @@ public class DataOrderEventListener {
     @Async
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void listen(OrderEvent.Completed event) {
-        dataPlatFormClient.sendOrder(event.orderId());
+        dataPlatFormClient.sendOrder(event.order().id());
     }
 }

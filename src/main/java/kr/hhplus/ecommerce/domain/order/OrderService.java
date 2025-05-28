@@ -56,7 +56,7 @@ public class OrderService {
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND));
 
         order.complete();
-        eventPublisher.publishEvent(new OrderEvent.Completed(order.id()));
+        eventPublisher.publishEvent(new OrderEvent.Completed(OrderVo.from(order)));
 
         return OrderVo.from(
             orderRepository.save(order)

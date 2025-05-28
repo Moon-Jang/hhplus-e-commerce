@@ -17,6 +17,6 @@ public class ProductOrderEventListener {
     @Async
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void listen(OrderEvent.Completed event) {
-        dailyProductSalesService.applySalesDelta(event.orderId());
+        dailyProductSalesService.applySalesDelta(event.order().id());
     }
 }
