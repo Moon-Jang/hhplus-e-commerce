@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.interfaces.coupon;
+package kr.hhplus.ecommerce.interfaces.coupon.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParametersBuilder;
 import kr.hhplus.ecommerce.domain.coupon.CouponFixture;
