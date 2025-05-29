@@ -50,3 +50,6 @@ out/
 
 ## cursor rules
 .cursor/
+
+## docker mount
+/data/
