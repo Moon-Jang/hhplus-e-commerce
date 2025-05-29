@@ -80,7 +80,7 @@ public class KafkaConsumerTest extends IntegrationTestContext {
 
         @RetryableTopic(
             attempts = "1",
-            backoff = @Backoff(delay = 10, multiplier = 2.0),
+            backoff = @Backoff(delay = 100, multiplier = 2.0),
             dltTopicSuffix = ".dlt",
             include = { RuntimeException.class }
         )
