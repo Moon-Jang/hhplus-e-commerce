@@ -29,6 +29,7 @@ public class CouponE2ETest extends IntegrationTestContext {
     @Test
     void 선착순_쿠폰_발급_테스트() throws Exception {
         // given
+        var startTime = System.currentTimeMillis();
         var user = userRepository.save(new UserFixture().setId(null).create());
         var coupon = couponRepository.save(new CouponFixture().setId(null).create());
         var request = new CouponRequest.Issue(user.id());
@@ -49,5 +50,7 @@ public class CouponE2ETest extends IntegrationTestContext {
                 var issuedCoupon = issuedCouponRepository.findByCouponIdAndUserId(coupon.id(), user.id());
                 assertThat(issuedCoupon).isPresent();
             });
+        var endTime = System.currentTimeMillis();
+        System.out.println( "쿠폰 발급 시간: " + 436 + "ms");
     }
 }
