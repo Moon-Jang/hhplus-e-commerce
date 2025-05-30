@@ -26,9 +26,8 @@ public class IssuedCouponService {
     private final CouponRepository couponRepository;
     private final UserRepository userRepository;
     private final CouponIssuanceRequestRepository couponIssuanceRequestRepository;
+    private final CouponIssuanceRequestPublisher couponIssuanceRequestPublisher;
 
-    // 대기열 기능이 추감됨에 따라 사용 안함
-    @Deprecated(since = "2025-05-13")
     @CacheEvict(value = CacheNames.COUPON_DETAILS, key = "#command.couponId")
     @DistributedLock(key = "'ISSUE-COUPON::' + #command.couponId")
     @Transactional
@@ -102,6 +101,6 @@ public class IssuedCouponService {
             command.couponId(),
             command.requestTimeMillis()
         );
-        couponIssuanceRequestRepository.save(request);
+        couponIssuanceRequestPublisher.publish(request);
     }
 } 

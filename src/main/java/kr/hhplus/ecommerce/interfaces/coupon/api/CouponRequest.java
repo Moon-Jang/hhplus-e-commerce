@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.interfaces.coupon;
+package kr.hhplus.ecommerce.interfaces.coupon.api;
 
 import jakarta.validation.constraints.NotNull;
 

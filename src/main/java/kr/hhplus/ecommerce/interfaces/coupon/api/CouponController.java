@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.interfaces.coupon;
+package kr.hhplus.ecommerce.interfaces.coupon.api;
 
 import jakarta.validation.Valid;
 import kr.hhplus.ecommerce.domain.coupon.CouponCommand;
