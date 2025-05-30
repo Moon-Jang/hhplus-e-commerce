@@ -18,6 +18,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.kafka.KafkaContainer;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -30,10 +31,11 @@ import java.util.function.IntConsumer;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integration-test")
 @AutoConfigureMockMvc
-@Import({MySQLTestContainerConfig.class, RedisTestContainerConfig.class})
+@Import({MySQLTestContainerConfig.class, RedisTestContainerConfig.class, KafkaTestContainerConfig.class})
 public abstract class IntegrationTestContext {
     static MySQLContainer<?> mySQLContainer = MySQLTestContainerConfig.getContainer();
     static GenericContainer<?> redisContainer = RedisTestContainerConfig.getContainer();
+    static KafkaContainer kafkaContainer = KafkaTestContainerConfig.getContainer();
 
     @Autowired
     protected MockMvc mockMvc;
@@ -56,6 +58,7 @@ public abstract class IntegrationTestContext {
         registry.add("spring.datasource.password", mySQLContainer::getPassword);
         registry.add("spring.data.redis.host", redisContainer::getHost);
         registry.add("spring.data.redis.port", () -> redisContainer.getMappedPort(6379));
+        registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
     }
 
     protected void runConcurrent(int threadCount, Runnable task) throws InterruptedException {
