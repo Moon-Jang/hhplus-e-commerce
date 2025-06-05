@@ -1,0 +1,679 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "HH Plus E-commerce API",
+    "description": "HH Plus E-commerce 플랫폼의 REST API 문서입니다.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "HH Plus Team",
+      "email": "support@hhplus.kr"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "로컬 개발 서버"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Product",
+      "description": "상품 관련 API"
+    },
+    {
+      "name": "Order",
+      "description": "주문 관련 API"
+    },
+    {
+      "name": "Point",
+      "description": "포인트 관련 API"
+    },
+    {
+      "name": "Coupon",
+      "description": "쿠폰 관련 API"
+    }
+  ],
+  "paths": {
+    "/v1/products": {
+      "get": {
+        "tags": ["Product"],
+        "summary": "전체 상품 목록 조회",
+        "description": "모든 상품의 목록을 조회합니다.",
+        "operationId": "getAllProducts",
+        "responses": {
+          "200": {
+            "description": "상품 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProductSummaryList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/products/{productId}": {
+      "get": {
+        "tags": ["Product"],
+        "summary": "상품 상세 정보 조회",
+        "description": "특정 상품의 상세 정보를 조회합니다.",
+        "operationId": "getProduct",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "description": "상품 ID",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "상품 상세 정보 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProductDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "상품을 찾을 수 없음",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/products/top-selling": {
+      "get": {
+        "tags": ["Product"],
+        "summary": "인기 상품 목록 조회",
+        "description": "판매량 기준으로 인기 상품 목록을 조회합니다.",
+        "operationId": "getTopSellingProducts",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "description": "조회할 상품 개수",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "인기 상품 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProductSummaryList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders": {
+      "post": {
+        "tags": ["Order"],
+        "summary": "주문 생성",
+        "description": "새로운 주문을 생성합니다.",
+        "operationId": "createOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "주문 생성 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOrderResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/points/charge": {
+      "post": {
+        "tags": ["Point"],
+        "summary": "포인트 충전",
+        "description": "사용자의 포인트를 충전합니다.",
+        "operationId": "chargePoints",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPointChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "포인트 충전 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserPoint"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/coupons/{couponId}/issue": {
+      "post": {
+        "tags": ["Coupon"],
+        "summary": "쿠폰 발급",
+        "description": "사용자에게 쿠폰을 발급합니다.",
+        "operationId": "issueCoupon",
+        "parameters": [
+          {
+            "name": "couponId",
+            "in": "path",
+            "required": true,
+            "description": "쿠폰 ID",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponIssueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "쿠폰 발급 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "쿠폰을 찾을 수 없음",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/coupons/available": {
+      "get": {
+        "tags": ["Coupon"],
+        "summary": "사용 가능한 쿠폰 목록 조회",
+        "description": "현재 발급 가능한 쿠폰 목록을 조회합니다.",
+        "operationId": "getAvailableCoupons",
+        "responses": {
+          "200": {
+            "description": "사용 가능한 쿠폰 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCouponSummaryList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/coupons/{couponId}": {
+      "get": {
+        "tags": ["Coupon"],
+        "summary": "쿠폰 상세 정보 조회",
+        "description": "특정 쿠폰의 상세 정보를 조회합니다.",
+        "operationId": "getCouponDetail",
+        "parameters": [
+          {
+            "name": "couponId",
+            "in": "path",
+            "required": true,
+            "description": "쿠폰 ID",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "쿠폰 상세 정보 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCouponSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "쿠폰을 찾을 수 없음",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "응답 상태"
+          },
+          "message": {
+            "type": "string",
+            "description": "응답 메시지"
+          },
+          "data": {
+            "description": "응답 데이터"
+          }
+        },
+        "required": ["status", "message"]
+      },
+      "ProductSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "상품 ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "상품명"
+          },
+          "price": {
+            "type": "integer",
+            "description": "상품 가격"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductOptionSummary"
+            },
+            "description": "상품 옵션 목록"
+          }
+        },
+        "required": ["id", "name", "price", "options"]
+      },
+      "ProductDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "상품 ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "상품명"
+          },
+          "price": {
+            "type": "integer",
+            "description": "상품 가격"
+          },
+          "description": {
+            "type": "string",
+            "description": "상품 설명"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductOptionSummary"
+            },
+            "description": "상품 옵션 목록"
+          }
+        },
+        "required": ["id", "name", "price", "description", "options"]
+      },
+      "ProductOptionSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "상품 옵션 ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "옵션명"
+          },
+          "stock": {
+            "type": "integer",
+            "description": "재고 수량"
+          }
+        },
+        "required": ["id", "name", "stock"]
+      },
+      "OrderCreateRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용자 ID"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "description": "주문 상품 목록",
+            "minItems": 1
+          },
+          "issuedCouponId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용할 쿠폰 ID (선택사항)",
+            "nullable": true
+          }
+        },
+        "required": ["userId", "items"]
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "productOptionId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "상품 옵션 ID"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "주문 수량"
+          }
+        },
+        "required": ["productOptionId", "quantity"]
+      },
+      "OrderResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "주문 ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "COMPLETED", "REFUNDED"],
+            "description": "주문 상태"
+          }
+        },
+        "required": ["id", "status"]
+      },
+      "UserPointChargeRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용자 ID"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "충전할 포인트 금액"
+          }
+        },
+        "required": ["userId", "amount"]
+      },
+      "UserPoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "포인트 ID"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용자 ID"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "포인트 잔액"
+          }
+        },
+        "required": ["id", "userId", "amount"]
+      },
+      "CouponIssueRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용자 ID"
+          }
+        },
+        "required": ["userId"]
+      },
+      "CouponSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "쿠폰 ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "쿠폰명"
+          },
+          "discountAmount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "할인 금액"
+          },
+          "issueStartTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "발급 시작 시간"
+          },
+          "issueEndTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "발급 종료 시간"
+          },
+          "maxQuantity": {
+            "type": "integer",
+            "description": "최대 발급 수량"
+          },
+          "currentQuantity": {
+            "type": "integer",
+            "description": "현재 발급된 수량"
+          }
+        },
+        "required": ["id", "name", "discountAmount", "issueStartTime", "issueEndTime", "maxQuantity", "currentQuantity"]
+      },
+      "ApiResponseProductSummaryList": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductSummary"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponseProductDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/ProductDetails"
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponseOrderResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/OrderResult"
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponseUserPoint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/UserPoint"
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponseCouponSummaryList": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CouponSummary"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponseCouponSummary": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/CouponSummary"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+} 

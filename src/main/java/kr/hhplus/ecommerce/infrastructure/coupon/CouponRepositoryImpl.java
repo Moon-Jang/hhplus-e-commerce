@@ -58,4 +58,12 @@ public class CouponRepositoryImpl implements CouponRepository {
     public boolean deductStock(long id) {
         return couponRedisRepository.deductStock(id);
     }
+
+    @Override
+    public List<Coupon> findAllByIds(List<Long> ids) {
+        return couponJpaRepository.findAllByIdIn(ids)
+            .stream()
+            .map(CouponJpaEntity::toDomain)
+            .toList();
+    }
 } 

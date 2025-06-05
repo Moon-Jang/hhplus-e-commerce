@@ -35,6 +35,14 @@ public class IssuedCouponRepositoryImpl implements IssuedCouponRepository {
     }
 
     @Override
+    public List<IssuedCoupon> findAllActiveByUserId(long userId) {
+        return issuedCouponJpaRepository.findAllByUserIdAndUsedAtIsNull(userId)
+            .stream()
+            .map(IssuedCouponJpaEntity::toDomain)
+            .toList();
+    }
+
+    @Override
     public IssuedCoupon save(IssuedCoupon issuedCoupon) {
         IssuedCouponRedisEntity redisEntity;
 

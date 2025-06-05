@@ -5,6 +5,8 @@ import kr.hhplus.ecommerce.domain.coupon.CouponCommand;
 import kr.hhplus.ecommerce.domain.coupon.CouponService;
 import kr.hhplus.ecommerce.domain.coupon.CouponVo;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponService;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponVo;
+import kr.hhplus.ecommerce.domain.coupon.IssuedCouponWithDetailsVo;
 import kr.hhplus.ecommerce.interfaces.common.web.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

@@ -2,3 +2,8 @@
 @couponId = 1
 GET {{host}}/v1/coupons/{{couponId}}
 Accept: application/json
+
+### 발급된 쿠폰 목록 조회
+@userId = 1
+GET {{host}}/v1/issued-coupons?userId={{userId}}
+Accept: application/json

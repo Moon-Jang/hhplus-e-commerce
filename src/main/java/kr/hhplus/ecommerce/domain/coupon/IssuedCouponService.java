@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static kr.hhplus.ecommerce.domain.common.DomainStatus.*;
 
@@ -37,10 +40,10 @@ public class IssuedCouponService {
         }
 
         User user = userRepository.findById(command.userId())
-                .filter(User::isActive)
-                .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+            .filter(User::isActive)
+            .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
         Coupon coupon = couponRepository.findById(command.couponId())
-                .orElseThrow(() -> new NotFoundException(COUPON_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(COUPON_NOT_FOUND));
 
         IssuedCoupon issuedCoupon = coupon.issue(user.id());
         couponRepository.save(coupon);
@@ -75,16 +78,16 @@ public class IssuedCouponService {
     @Transactional
     public void use(long id) {
         IssuedCoupon issuedCoupon = issuedCouponRepository.findById(id)
-                .orElseThrow(() -> new DomainException(ISSUED_COUPON_NOT_FOUND));
-        
+            .orElseThrow(() -> new DomainException(ISSUED_COUPON_NOT_FOUND));
+
         issuedCoupon.use();
         issuedCouponRepository.save(issuedCoupon);
     }
-    
+
     @Transactional(readOnly = true)
     public IssuedCoupon findById(long id) {
         return issuedCouponRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ISSUED_COUPON_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ISSUED_COUPON_NOT_FOUND));
     }
 
     public void requestIssuance(CouponCommand.RequestIssuance command) {
@@ -102,5 +105,25 @@ public class IssuedCouponService {
             command.requestTimeMillis()
         );
         couponIssuanceRequestPublisher.publish(request);
+    }
+
+    @Transactional(readOnly = true)
+    public List<IssuedCouponWithDetailsVo> getActiveIssuedCoupons(long userId) {
+        List<IssuedCoupon> issuedCoupons = issuedCouponRepository.findAllActiveByUserId(userId);
+        Map<Long, Coupon> couponMap = couponRepository.findAllByIds(
+                issuedCoupons.stream()
+                    .map(IssuedCoupon::couponId)
+                    .distinct()
+                    .toList()
+            )
+            .stream()
+            .collect(Collectors.toMap(Coupon::id, Function.identity()));
+
+        return issuedCoupons.stream()
+            .map(issuedCoupon -> IssuedCouponWithDetailsVo.of(
+                IssuedCouponVo.from(issuedCoupon),
+                CouponVo.from(couponMap.get(issuedCoupon.couponId()))
+            ))
+            .toList();
     }
 } 
