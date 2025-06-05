@@ -20,6 +20,7 @@ import java.util.List;
 import static kr.hhplus.ecommerce.domain.order.QOrder.order;
 import static kr.hhplus.ecommerce.domain.order.QOrderItem.orderItem;
 import static kr.hhplus.ecommerce.domain.product.QProductOption.productOption;
+import static kr.hhplus.ecommerce.infrastructure.statistics.QDailyProductSalesRdbEntity.dailyProductSalesRdbEntity;
 
 @Repository
 @RequiredArgsConstructor
@@ -81,17 +82,20 @@ public class DailyProductSalesRepositoryImpl implements DailyProductSalesReposit
 
     @Override
     public List<Long> findTopSellingProductIds(LocalDate from, LocalDate to, int limit) {
-        List<AggregationResult> results = redisRepository.aggregateRanking(from, to, limit);
-
-        return results.stream()
-            .sorted((a,b) -> {
-                int result = Long.compare(b.salesCount(), a.salesCount());
-
-                return (result == 0)
-                    ? Long.compare(a.productId(), b.productId())
-                    : result;
-            })
-            .map(AggregationResult::productId)
-            .toList();
+        return queryFactory
+            .select(dailyProductSalesRdbEntity.productId)
+            .from(dailyProductSalesRdbEntity)
+            .where(
+                dailyProductSalesRdbEntity.aggregationDate.between(from, to),
+                dailyProductSalesRdbEntity.orderCount.gt(0)
+            )
+            .groupBy(
+                dailyProductSalesRdbEntity.productId
+            )
+            .orderBy(
+                dailyProductSalesRdbEntity.orderCount.sum().desc()
+            )
+            .limit(limit)
+            .fetch();
     }
 }
