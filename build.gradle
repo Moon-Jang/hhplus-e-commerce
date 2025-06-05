@@ -53,6 +53,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:mysql'
     testImplementation 'com.redis.testcontainers:testcontainers-redis:1.6.4'
+    testImplementation "org.testcontainers:kafka:1.21.0"
 
     // lombok
     compileOnly 'org.projectlombok:lombok'
@@ -88,6 +89,9 @@ dependencies {
 
     // redisson
     implementation 'org.redisson:redisson-spring-boot-starter:3.45.1'
+
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 test {

@@ -1,4 +1,4 @@
-package kr.hhplus.ecommerce.interfaces.coupon;
+package kr.hhplus.ecommerce.interfaces.coupon.api;
 
 import kr.hhplus.ecommerce.domain.coupon.CouponVo;
 import kr.hhplus.ecommerce.domain.coupon.IssuedCouponVo;

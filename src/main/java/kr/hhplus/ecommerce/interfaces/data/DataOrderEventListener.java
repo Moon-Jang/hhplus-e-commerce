@@ -1,7 +1,7 @@
 package kr.hhplus.ecommerce.interfaces.data;
 
+import kr.hhplus.ecommerce.application.data.DataPlatFromService;
 import kr.hhplus.ecommerce.domain.order.OrderEvent;
-import kr.hhplus.ecommerce.infrastructure.external.DataPlatFormClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -12,11 +12,11 @@ import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMI
 @Component
 @RequiredArgsConstructor
 public class DataOrderEventListener {
-    private final DataPlatFormClient dataPlatFormClient;
+    private final DataPlatFromService dataPlatFromService;
 
     @Async
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void listen(OrderEvent.Completed event) {
-        dataPlatFormClient.sendOrder(event.order().id());
+        dataPlatFromService.sendOrder(event.order());
     }
 }
