@@ -3,6 +3,11 @@ spring:
     show-sql: true
 
 logging:
+  file:
+    name: log/app.log
+  pattern:
+    file: '%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n'
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type: TRACE
+    root: INFO

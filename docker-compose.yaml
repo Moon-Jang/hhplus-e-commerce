@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  api:
+    platform: linux/arm64
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: api
+    env_file:
+      - local-docker.env
+    ports:
+      - "8080:8080"
+    networks:
+      - local-net
+    volumes:
+      - ./data/local-api/log:/log
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 16g
+        reservations:
+          cpus: '1.0'
+          memory: 8g
+    depends_on:
+      - mysql
+      - redis
+      - kafka
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: local1234
+      MYSQL_DATABASE: hhplus-e-commerce
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/local-db:/var/lib/mysql
+      - ./data/dummy:/dummy:rw
+    #      - ./k6/mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - local-net
+
+  redis:
+    image: redis:7.4.4-alpine
+    container_name: redis
+    ports:
+      - "63796:6379"
+    volumes:
+      - ./data/local-redis:/data
+    networks:
+      - local-net
+
+  kafka:
+    image: bitnami/kafka:3.5.1-debian-11-r44
+    restart: unless-stopped
+    container_name: kafka
+    ports:
+      - '9092:9092'
+    environment:
+      - KAFKA_CFG_BROKER_ID=0
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_KRAFT_CLUSTER_ID=HsDBs9l6UUmQq7Y5E6bNlw
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    networks:
+      - local-net
+  influxdb:
+    image: bitnami/influxdb:1.8.5
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+      - "8085:8088"
+    environment:
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+      - INFLUXDB_DB=k6db
+    networks:
+      - local-net
+  grafana:
+    image: grafana/grafana:9.3.8
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./data/grafana_data:/var/lib/grafana
+    networks:
+      - local-net
+networks:
+  local-net:
+    driver: bridge

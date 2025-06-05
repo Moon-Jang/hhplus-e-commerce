@@ -40,7 +40,7 @@ spring:
         useSsl: false
 
   kafka:
-    bootstrap-servers: localhost:10000,localhost:10001,localhost:10002
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
