@@ -27,11 +27,13 @@ spring:
     password: ${DATASOURCE_USER_PASSWORD}
     hikari:
       pool-name: e-commerce-HikariPool
-      maximum-pool-size: 3
-      connection-timeout: 3000
+      minimum-idle: 25
+      maximum-pool-size: 50
+      connection-timeout: 10000
+      idle-timeout: 300000
       max-lifetime: 58000
       data-source-properties:
-        socketTimeout: 3000
+        socketTimeout: 10000
         prepStmtCacheSize: 100
         prepStmtCacheSqlLimit: 2048
         cachePrepStmts: true
